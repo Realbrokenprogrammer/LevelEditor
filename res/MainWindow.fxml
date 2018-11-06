@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
@@ -7,33 +8,85 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="350.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="editor.controller.MainWindowController">
 	<children>
-		<MenuBar fx:id="menuBar">
-			<menus>
-				<Menu fx:id="menuFile" mnemonicParsing="false" text="File">
-					<items>
-						<MenuItem fx:id="menuFileNew" mnemonicParsing="false" text="New File" />
-					</items>
-				</Menu>
-				<Menu mnemonicParsing="false" text="Edit">
-					<items>
-						<MenuItem mnemonicParsing="false" text="Delete" />
-					</items>
-				</Menu>
-				<Menu mnemonicParsing="false" text="Help">
-					<items>
-						<MenuItem mnemonicParsing="false" text="About" />
-					</items>
-				</Menu>
-			</menus>
-		</MenuBar>
-    <AnchorPane fx:id="anchorPane" minHeight="0.0" minWidth="0.0">
-         <children>
-            <ScrollPane fx:id="scrollPane">
-               <content>
-            		<Canvas fx:id="canvas" height="225.0" width="350.0" />
-               </content>
-            </ScrollPane>
-         </children>
-      </AnchorPane>
+      <BorderPane>
+         <top>
+      		<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+      			<menus>
+      				<Menu fx:id="menuFile" mnemonicParsing="false" text="File">
+      					<items>
+      						<MenuItem fx:id="menuFileNew" mnemonicParsing="false" text="New File" />
+      					</items>
+      				</Menu>
+      				<Menu mnemonicParsing="false" text="Edit">
+      					<items>
+      						<MenuItem mnemonicParsing="false" text="Delete" />
+      					</items>
+      				</Menu>
+      				<Menu mnemonicParsing="false" text="Help">
+      					<items>
+      						<MenuItem mnemonicParsing="false" text="About" />
+      					</items>
+      				</Menu>
+      			</menus>
+      		</MenuBar>
+         </top>
+         <center>
+          <AnchorPane fx:id="anchorPane" minHeight="0.0" minWidth="0.0" BorderPane.alignment="CENTER">
+               <children>
+                  <ScrollPane fx:id="scrollPane">
+                     <content>
+                  		<Canvas fx:id="canvas" height="225.0" width="350.0" />
+                     </content>
+                  </ScrollPane>
+               </children>
+            </AnchorPane>
+         </center>
+         <bottom>
+            <HBox fx:id="layerBar" prefHeight="30.0" BorderPane.alignment="CENTER">
+               <children>
+                  <Pane prefHeight="30.0">
+                     <children>
+                        <Text layoutX="6.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Layers:" wrappingWidth="40.0" />
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="30.0" prefWidth="30.0">
+                     <children>
+                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="1" wrappingWidth="13.0" />
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="30.0" prefWidth="30.0">
+                     <children>
+                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="2" wrappingWidth="13.0" />
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="30.0" prefWidth="30.0">
+                     <children>
+                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="3" wrappingWidth="13.0" />
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="30.0" prefWidth="30.0">
+                     <children>
+                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="4" wrappingWidth="13.0" />
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="30.0" prefWidth="30.0">
+                     <children>
+                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="5" wrappingWidth="13.0" />
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="30.0" prefWidth="30.0">
+                     <children>
+                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="6" wrappingWidth="13.0" />
+                     </children>
+                  </Pane>
+                  <Pane prefHeight="30.0" prefWidth="30.0">
+                     <children>
+                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="7" wrappingWidth="13.0" />
+                     </children>
+                  </Pane>
+               </children>
+            </HBox>
+         </bottom>
+      </BorderPane>
 	</children>
 </VBox>
