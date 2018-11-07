@@ -3,10 +3,13 @@ package editor.controller;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 
+import editor.entities.GameObject;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -14,6 +17,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -37,8 +42,9 @@ public class MainWindowController implements LevelEditorController {
 	@FXML public HBox objectBar;
 	
 	private LevelSettings levelSettings;
-	private int[][] tileMap;
+	private ArrayList<ArrayList<GameObject>> levelMap;
 	private int currentLayer = 4;
+	private int currentObjectType = 0;
 	
 	private final int TILE_SIZE = 50;
 	
@@ -78,8 +84,7 @@ public class MainWindowController implements LevelEditorController {
 		AnchorPane.setLeftAnchor(stackPane, 0.0);
 		AnchorPane.setRightAnchor(stackPane, 0.0);
 		
-		objectPanel.setStyle("-fx-background-color: #CCCCCC");
-		objectBar.setStyle("-fx-background-color: #FFFFFF");
+		initObjectPanel();
 		
 		menuFileNew.setOnAction(e -> {
 			Parent root;
@@ -107,7 +112,10 @@ public class MainWindowController implements LevelEditorController {
 	
 	public void setNewLevel(LevelSettings levelSettings) {
 		this.levelSettings = levelSettings;
-		this.tileMap = new int[levelSettings.width][levelSettings.height];
+		this.levelMap = new ArrayList<ArrayList<GameObject>>();
+		for (int i = 0; i < 8; i++) {
+			levelMap.add(new ArrayList<GameObject>());
+		}
 		this.canvas.setWidth(levelSettings.width * TILE_SIZE + 15);
 		this.canvas.setHeight(levelSettings.height * TILE_SIZE + 15);
 		Stage stage = (Stage) this.canvas.getScene().getWindow();
@@ -123,6 +131,8 @@ public class MainWindowController implements LevelEditorController {
 		}
 		stage.setWidth(width);
 		stage.setHeight(height);
+		
+		this.objectPanel.setMinHeight(height);
 		
 		canvas.setOnMouseMoved(e -> {
 			drawGrid(levelSettings, e.getX(), e.getY());
@@ -150,6 +160,60 @@ public class MainWindowController implements LevelEditorController {
 						objectScroll.setVisible(true);
 					}
 				}
+			});
+		}
+	}
+	
+	private void initObjectPanel() {
+		objectPanel.setStyle("-fx-background-color: #CCCCCC");
+		objectBar.setStyle("-fx-background-color: #FFFFFF");
+		objectBar.setTranslateX(-10);
+		
+		addGameObjectContent(0);
+		
+		ObservableList<Node> list = objectBar.getChildren();
+		list.get(0).setStyle("-fx-background-color: #CCCCCC");
+		for(int i = 0; i < list.size(); i++) {
+			final int index = i;
+			Pane p = (Pane) list.get(i);
+			p.setOnMouseEntered(e -> {
+				p.setStyle("-fx-background-color: #CCCCCC");
+			});
+			p.setOnMouseExited(e -> {
+				if (index != currentObjectType) {
+					p.setStyle("-fx-background-color: #FFFFFF");	
+				}
+			});
+			p.setOnMouseClicked(e -> {
+				if (index != currentObjectType) {
+					list.get(currentObjectType).setStyle("-fx-background-color: #FFFFFF");
+					currentObjectType = index;
+					p.setStyle("-fx-background-color: #CCCCCC");
+					for (int j = 1; j < objectPanel.getChildren().size(); j++) {
+						objectPanel.getChildren().remove(j);
+					}
+					addGameObjectContent(index);
+				}
+			});
+		}
+	}
+	
+	private void addGameObjectContent(int index) {
+		if (index == 0) {
+			ImageView iv = new ImageView();
+			objectPanel.setSpacing(10);
+			objectPanel.setPadding(new Insets(0, 10, 10, 10));
+			Image img = new Image("file:res/sprites/grass.png");
+			iv.setImage(img);
+			objectPanel.getChildren().add(iv);
+		} else if (index == 1) {
+			
+		}
+		for (int i = 1; i < objectPanel.getChildren().size(); i++) {
+			ImageView iv = (ImageView) objectPanel.getChildren().get(i);
+			final int ivIndex = i;
+			iv.setOnMouseClicked(e -> {
+				System.out.println(ivIndex);
 			});
 		}
 	}
