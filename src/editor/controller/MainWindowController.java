@@ -12,13 +12,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
@@ -31,6 +31,10 @@ public class MainWindowController implements LevelEditorController {
 	@FXML public ScrollPane scrollPane;
 	@FXML public AnchorPane anchorPane;
 	@FXML public HBox layerBar;
+	@FXML public VBox objectPanel;
+	@FXML public StackPane stackPane;
+	@FXML public ScrollPane objectScroll;
+	@FXML public HBox objectBar;
 	
 	private LevelSettings levelSettings;
 	private int[][] tileMap;
@@ -69,10 +73,13 @@ public class MainWindowController implements LevelEditorController {
 */
 	
 	@FXML public void initialize() {
-		AnchorPane.setTopAnchor(scrollPane, 0.0);
-		AnchorPane.setBottomAnchor(scrollPane, 0.0);
-		AnchorPane.setLeftAnchor(scrollPane, 0.0);
-		AnchorPane.setRightAnchor(scrollPane, 0.0);
+		AnchorPane.setTopAnchor(stackPane, 0.0);
+		AnchorPane.setBottomAnchor(stackPane, 0.0);
+		AnchorPane.setLeftAnchor(stackPane, 0.0);
+		AnchorPane.setRightAnchor(stackPane, 0.0);
+		
+		objectPanel.setStyle("-fx-background-color: #CCCCCC");
+		objectBar.setStyle("-fx-background-color: #FFFFFF");
 		
 		menuFileNew.setOnAction(e -> {
 			Parent root;
@@ -124,6 +131,7 @@ public class MainWindowController implements LevelEditorController {
 		ObservableList<Node> list = layerBar.getChildren();
 		for(int i = 1; i < list.size(); i++) {
 			Pane p = (Pane) list.get(i);
+			final int index = i;
 			p.setOnMouseEntered(e -> {
 				p.setStyle("-fx-background-color: #CCCCCC");
 			});
@@ -131,9 +139,17 @@ public class MainWindowController implements LevelEditorController {
 				p.setStyle("-fx-background-color: #FFFFFF");
 			});
 			p.setOnMouseClicked(e -> {
-				Text t = (Text) p.getChildren().get(0);
-				currentLayer = Integer.parseInt(t.getText());
-				System.out.println(t.getText());
+				if (index < list.size() - 1) {
+					Text t = (Text) p.getChildren().get(0);
+					currentLayer = Integer.parseInt(t.getText());
+					System.out.println(t.getText());
+				} else {
+					if (objectScroll.isVisible()) {
+						objectScroll.setVisible(false);
+					} else {
+						objectScroll.setVisible(true);
+					}
+				}
 			});
 		}
 	}
