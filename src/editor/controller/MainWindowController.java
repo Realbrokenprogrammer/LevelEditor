@@ -1,11 +1,14 @@
 package editor.controller;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 
 import editor.entities.GameObject;
+import editor.entities.ObjectType;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -28,9 +31,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.input.KeyCode;
 
 public class MainWindowController implements LevelEditorController {
 	
+	@FXML public VBox root;
 	@FXML public MenuItem menuFileNew;
 	@FXML public Canvas canvas;
 	@FXML public ScrollPane scrollPane;
@@ -41,10 +46,13 @@ public class MainWindowController implements LevelEditorController {
 	@FXML public ScrollPane objectScroll;
 	@FXML public HBox objectBar;
 	
-	private LevelSettings levelSettings;
 	private ArrayList<ArrayList<GameObject>> levelMap;
 	private int currentLayer = 4;
 	private int currentObjectType = 0;
+	private GameObject currentObject = null;
+	private boolean ctrlIsDown = false;
+	private boolean snapToGrid = true;
+	private GameObject[] allObjects;
 	
 	private final int TILE_SIZE = 50;
 	
@@ -84,6 +92,8 @@ public class MainWindowController implements LevelEditorController {
 		AnchorPane.setLeftAnchor(stackPane, 0.0);
 		AnchorPane.setRightAnchor(stackPane, 0.0);
 		
+		initAllObjects();
+		
 		initObjectPanel();
 		
 		menuFileNew.setOnAction(e -> {
@@ -111,7 +121,6 @@ public class MainWindowController implements LevelEditorController {
 	}
 	
 	public void setNewLevel(LevelSettings levelSettings) {
-		this.levelSettings = levelSettings;
 		this.levelMap = new ArrayList<ArrayList<GameObject>>();
 		for (int i = 0; i < 8; i++) {
 			levelMap.add(new ArrayList<GameObject>());
@@ -119,16 +128,9 @@ public class MainWindowController implements LevelEditorController {
 		this.canvas.setWidth(levelSettings.width * TILE_SIZE + 15);
 		this.canvas.setHeight(levelSettings.height * TILE_SIZE + 15);
 		Stage stage = (Stage) this.canvas.getScene().getWindow();
-		int width = (int) (this.canvas.getWidth() + 7);
-		int height = (int) (this.canvas.getHeight() + 55);
-		
-		// TODO: Get size of user screen.
-		if (width > 1600) {
-			width = 1600;
-		}
-		if (height > 900) {
-			height = 900;
-		}
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		double width = screenSize.getWidth() * 0.7;
+		double height = screenSize.getHeight() * 0.7;
 		stage.setWidth(width);
 		stage.setHeight(height);
 		
@@ -138,7 +140,38 @@ public class MainWindowController implements LevelEditorController {
 			drawGrid(levelSettings, e.getX(), e.getY());
 		});
 		
+		canvas.setOnMouseClicked(e -> {
+			canvasClick(e.getX(), e.getY());
+		});
+		
+		root.setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.CONTROL) {
+				ctrlIsDown = true;
+			}
+		});
+		
+		root.setOnKeyReleased(e -> {
+			if (e.getCode() == KeyCode.CONTROL) {
+				ctrlIsDown = false;
+			}
+			if (e.getCode() == KeyCode.S) {
+				if (snapToGrid) {
+					snapToGrid = false;
+				} else {
+					snapToGrid = true;
+				}
+			}
+		});
+		
+		root.setOnScroll(e -> {
+			if (ctrlIsDown) {
+				System.out.println("hej");
+			}
+		});
+		
 		ObservableList<Node> list = layerBar.getChildren();
+		Pane firstPane = (Pane) list.get(currentLayer);
+		firstPane.setStyle("-fx-background-color: #CCCCCC");
 		for(int i = 1; i < list.size(); i++) {
 			Pane p = (Pane) list.get(i);
 			final int index = i;
@@ -146,12 +179,19 @@ public class MainWindowController implements LevelEditorController {
 				p.setStyle("-fx-background-color: #CCCCCC");
 			});
 			p.setOnMouseExited(e -> {
-				p.setStyle("-fx-background-color: #FFFFFF");
+				if(index != currentLayer) {
+					p.setStyle("-fx-background-color: #FFFFFF");
+				}
 			});
 			p.setOnMouseClicked(e -> {
 				if (index < list.size() - 1) {
 					Text t = (Text) p.getChildren().get(0);
 					currentLayer = Integer.parseInt(t.getText());
+					for(int j = 1; j < list.size(); j++) {
+						Pane pane = (Pane) list.get(j);
+						pane.setStyle("-fx-background-color: #FFFFFF");
+					}
+					p.setStyle("-fx-background-color: #CCCCCC");
 					System.out.println(t.getText());
 				} else {
 					if (objectScroll.isVisible()) {
@@ -162,6 +202,15 @@ public class MainWindowController implements LevelEditorController {
 				}
 			});
 		}
+	}
+	
+	private void initAllObjects() {
+		GameObject grass = new GameObject();
+		grass.type = ObjectType.TILE;
+		grass.objectName = "grass";
+		
+		GameObject[] temp = {grass};
+		allObjects = temp;
 	}
 	
 	private void initObjectPanel() {
@@ -199,22 +248,50 @@ public class MainWindowController implements LevelEditorController {
 	}
 	
 	private void addGameObjectContent(int index) {
-		if (index == 0) {
-			ImageView iv = new ImageView();
-			objectPanel.setSpacing(10);
-			objectPanel.setPadding(new Insets(0, 10, 10, 10));
-			Image img = new Image("file:res/sprites/grass.png");
-			iv.setImage(img);
-			objectPanel.getChildren().add(iv);
-		} else if (index == 1) {
+		if(index == 0) {
+			for (int i = 0; i < this.allObjects.length; i++) {
+				if(allObjects[i].type == ObjectType.TILE) {
+					ImageView iv = new ImageView();
+					objectPanel.setSpacing(10);
+					objectPanel.setPadding(new Insets(0, 10, 10, 10));
+					Image img = new Image("file:res/sprites/" + allObjects[i].objectName + ".png");
+					iv.setImage(img);
+					objectPanel.getChildren().add(iv);
+					iv.setOnMouseClicked(e -> {
+						GameObject t = new GameObject();
+						t.type = ObjectType.TILE;
+						t.objectName = "grass";
+						t.imageURL = "res/sprites/" + t.objectName + ".png";
+						currentObject = t;
+					});
+				}
+			}	
+		} else if(index == 1) {
 			
 		}
-		for (int i = 1; i < objectPanel.getChildren().size(); i++) {
-			ImageView iv = (ImageView) objectPanel.getChildren().get(i);
-			final int ivIndex = i;
-			iv.setOnMouseClicked(e -> {
-				System.out.println(ivIndex);
-			});
+	}
+	
+	private void canvasClick(double mouseX, double mouseY) {
+		int x = (int) (mouseX / TILE_SIZE);
+		int y = (int) (mouseY / TILE_SIZE);
+		GraphicsContext g = this.canvas.getGraphicsContext2D();
+		if (currentObject != null) {
+			GameObject t = new GameObject();
+			t.type = currentObject.type;
+			t.objectName = currentObject.objectName;
+			t.imageURL = "res/sprites/" + t.objectName + ".png";
+			
+			if (snapToGrid) {
+				t.x = x * TILE_SIZE;
+				t.y = y * TILE_SIZE;
+			} else {
+				t.x = mouseX - t.width / 2;
+				t.y = mouseY - t.height / 2;
+			}
+			
+			Image img = new Image("file:" + t.imageURL);
+			g.drawImage(img, t.x, t.y);
+			levelMap.get(currentLayer - 1).add(t);
 		}
 	}
 	
@@ -230,9 +307,25 @@ public class MainWindowController implements LevelEditorController {
 				g.strokeRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 			}
 		}
-		g.setStroke(Color.GREEN);
-		g.setLineWidth(3);
-		g.strokeRect(x * TILE_SIZE, (y * TILE_SIZE), TILE_SIZE, TILE_SIZE);
-		g.setLineWidth(1);
+		
+		if (currentObject != null) {
+			GameObject t = currentObject;
+			Image img = new Image("file:res/sprites/" + t.objectName + ".png");
+			if (snapToGrid) {
+				g.drawImage(img, x * TILE_SIZE, (y * TILE_SIZE));
+			} else {
+				g.drawImage(img, mouseX - t.width / 2, mouseY - t.height / 2);
+			}
+		}
+		
+		for (int i = 0; i < levelMap.size(); i++) {
+			for (int j = 0; j < levelMap.get(i).size(); j++) {
+				GameObject gb = levelMap.get(i).get(j);
+				if (gb.imageURL != "") {
+					Image img = new Image("file:" + gb.imageURL);
+					g.drawImage(img, gb.x, gb.y);
+				}
+			}
+		}
 	}
 }
