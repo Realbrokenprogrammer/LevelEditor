@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import editor.entities.GameObject;
 import editor.entities.ObjectType;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -32,6 +33,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.ScrollEvent;
 
 public class MainWindowController implements LevelEditorController {
 	
@@ -53,6 +55,7 @@ public class MainWindowController implements LevelEditorController {
 	private boolean ctrlIsDown = false;
 	private boolean snapToGrid = true;
 	private GameObject[] allObjects;
+	private double scale = 1.0;
 	
 	private final int TILE_SIZE = 50;
 	
@@ -144,13 +147,13 @@ public class MainWindowController implements LevelEditorController {
 			canvasClick(e.getX(), e.getY());
 		});
 		
-		root.setOnKeyPressed(e -> {
+		canvas.getScene().setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.CONTROL) {
 				ctrlIsDown = true;
 			}
 		});
 		
-		root.setOnKeyReleased(e -> {
+		canvas.getScene().setOnKeyReleased(e -> {
 			if (e.getCode() == KeyCode.CONTROL) {
 				ctrlIsDown = false;
 			}
@@ -163,10 +166,28 @@ public class MainWindowController implements LevelEditorController {
 			}
 		});
 		
-		root.setOnScroll(e -> {
-			if (ctrlIsDown) {
-				System.out.println("hej");
-			}
+		canvas.getScene().addEventFilter(ScrollEvent.ANY, new EventHandler<ScrollEvent>() {
+	        @Override
+	        public void handle(ScrollEvent event) {
+	            if (ctrlIsDown) {
+	            	if (event.getDeltaY() > 0) {
+	            		// Zoom in
+	            		if (scale < 3) {
+	            			scale += 0.2;
+	            		}
+	            	} else {
+	            		// Zoom out
+	            		if (scale > 0.6) {
+	            			scale -= 0.2;	
+	            		}
+	            	}
+	            	drawGrid(levelSettings, 0, 0);
+	            } else {
+	            	double delta = event.getDeltaY() / canvas.getHeight();
+	            	scrollPane.setVvalue(scrollPane.getVvalue() - delta * 1.5);
+	            }
+	            event.consume();
+	        }
 		});
 		
 		ObservableList<Node> list = layerBar.getChildren();
@@ -272,8 +293,8 @@ public class MainWindowController implements LevelEditorController {
 	}
 	
 	private void canvasClick(double mouseX, double mouseY) {
-		int x = (int) (mouseX / TILE_SIZE);
-		int y = (int) (mouseY / TILE_SIZE);
+		int x = (int) (mouseX / (TILE_SIZE * scale));
+		int y = (int) (mouseY / (TILE_SIZE * scale));
 		GraphicsContext g = this.canvas.getGraphicsContext2D();
 		if (currentObject != null) {
 			GameObject t = new GameObject();
@@ -285,45 +306,45 @@ public class MainWindowController implements LevelEditorController {
 				t.x = x * TILE_SIZE;
 				t.y = y * TILE_SIZE;
 			} else {
-				t.x = mouseX - t.width / 2;
-				t.y = mouseY - t.height / 2;
+				t.x = mouseX - (t.width) / 2;
+				t.y = mouseY - (t.height) / 2;
 			}
 			
-			Image img = new Image("file:" + t.imageURL);
-			g.drawImage(img, t.x, t.y);
+			Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
+			g.drawImage(img, t.x * scale, t.y * scale);
 			levelMap.get(currentLayer - 1).add(t);
 		}
 	}
 	
 	private void drawGrid(LevelSettings levelSettings, double mouseX, double mouseY) {
-		int x = (int) (mouseX / TILE_SIZE);
-		int y = (int) (mouseY / TILE_SIZE);
+		int x = (int) (mouseX / (TILE_SIZE * scale));
+		int y = (int) (mouseY / (TILE_SIZE * scale));
 		
 		GraphicsContext g = this.canvas.getGraphicsContext2D();
 		g.clearRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
 		g.setStroke(Color.GRAY);
 		for (int i = 0; i < levelSettings.width; i++) {
 			for (int j = 0; j < levelSettings.height; j++) {
-				g.strokeRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+				g.strokeRect(i * TILE_SIZE * scale, j * TILE_SIZE * scale, TILE_SIZE * scale, TILE_SIZE * scale);
 			}
 		}
 		
 		if (currentObject != null) {
 			GameObject t = currentObject;
-			Image img = new Image("file:res/sprites/" + t.objectName + ".png");
+			Image img = new Image("file:res/sprites/" + t.objectName + ".png", t.width * scale, t.height * scale, false, false);
 			if (snapToGrid) {
-				g.drawImage(img, x * TILE_SIZE, (y * TILE_SIZE));
+				g.drawImage(img, x * TILE_SIZE * scale, y * TILE_SIZE * scale);
 			} else {
-				g.drawImage(img, mouseX - t.width / 2, mouseY - t.height / 2);
+				g.drawImage(img, mouseX - (t.width * scale) / 2, mouseY - (t.height * scale) / 2);
 			}
 		}
 		
 		for (int i = 0; i < levelMap.size(); i++) {
 			for (int j = 0; j < levelMap.get(i).size(); j++) {
-				GameObject gb = levelMap.get(i).get(j);
-				if (gb.imageURL != "") {
-					Image img = new Image("file:" + gb.imageURL);
-					g.drawImage(img, gb.x, gb.y);
+				GameObject t = levelMap.get(i).get(j);
+				if (t.imageURL != "") {
+					Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
+					g.drawImage(img, t.x * scale, t.y * scale);
 				}
 			}
 		}
