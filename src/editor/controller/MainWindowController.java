@@ -23,6 +23,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -50,9 +51,11 @@ public class MainWindowController implements LevelEditorController {
 	@FXML public HBox objectBar;
 	
 	private ArrayList<ArrayList<GameObject>> levelMap;
+	private LevelSettings levelSettings;
 	private int currentLayer = 4;
 	private int currentObjectType = 0;
 	private GameObject currentObject = null;
+	private GameObject selectedObject = null;
 	private boolean ctrlIsDown = false;
 	private boolean snapToGrid = true;
 	private GameObject[] allObjects;
@@ -127,6 +130,7 @@ public class MainWindowController implements LevelEditorController {
 	}
 	
 	public void setNewLevel(LevelSettings levelSettings) {
+		this.levelSettings = levelSettings;
 		this.levelMap = new ArrayList<ArrayList<GameObject>>();
 		for (int i = 0; i < 8; i++) {
 			levelMap.add(new ArrayList<GameObject>());
@@ -145,17 +149,30 @@ public class MainWindowController implements LevelEditorController {
 		canvas.setOnMouseMoved(e -> {
 			mouseX = e.getX();
 			mouseY = e.getY();
-			drawGrid(levelSettings);
+			drawGrid();
 		});
 		
-		canvas.setOnMouseClicked(e -> {
+		canvas.setOnMousePressed(e -> {
 			mouseX = e.getX();
 			mouseY = e.getY();
 			if (e.getButton() == MouseButton.PRIMARY) {
-				placeObject();
+				if (currentObject != null) {
+					placeObject();
+				} else {
+					selectObject();
+				}
 			} else if (e.getButton() == MouseButton.SECONDARY) {
 				removeObject();
-			}	
+			}
+		});
+		
+		canvas.setOnMouseDragged(e -> {
+			mouseX = e.getX();
+			mouseY = e.getY();
+			if(selectedObject != null) {
+				updateSelectedPosition();
+				drawGrid();
+			}
 		});
 		
 		canvas.getScene().setOnKeyPressed(e -> {
@@ -195,7 +212,7 @@ public class MainWindowController implements LevelEditorController {
 	            	// Resize canvas
 	            	canvas.setWidth(levelSettings.width * TILE_SIZE * scale);
 	            	canvas.setHeight(levelSettings.height * TILE_SIZE * scale);
-	            	drawGrid(levelSettings);
+	            	drawGrid();
 	            } else {
 	            	double delta = event.getDeltaY() / canvas.getHeight();
 	            	scrollPane.setVvalue(scrollPane.getVvalue() - delta * 1.5);
@@ -219,7 +236,7 @@ public class MainWindowController implements LevelEditorController {
 				}
 			});
 			p.setOnMouseClicked(e -> {
-				if (index < list.size() - 1) {
+				if (index < list.size() - 2) {
 					Text t = (Text) p.getChildren().get(0);
 					currentLayer = Integer.parseInt(t.getText());
 					for(int j = 1; j < list.size(); j++) {
@@ -227,13 +244,14 @@ public class MainWindowController implements LevelEditorController {
 						pane.setStyle("-fx-background-color: #FFFFFF");
 					}
 					p.setStyle("-fx-background-color: #CCCCCC");
-					System.out.println(t.getText());
-				} else {
+				} else if (index == list.size() - 2) {
 					if (objectScroll.isVisible()) {
 						objectScroll.setVisible(false);
 					} else {
 						objectScroll.setVisible(true);
 					}
+				} else if (index == list.size() - 1) {
+					currentObject = null;
 				}
 			});
 		}
@@ -242,8 +260,7 @@ public class MainWindowController implements LevelEditorController {
 	private void initAllObjects() {
 		GameObject grass = new GameObject();
 		grass.type = ObjectType.TILE;
-		grass.objectName = "grass";
-		
+		grass.objectName = "grass";	
 		GameObject[] temp = {grass};
 		allObjects = temp;
 	}
@@ -298,6 +315,7 @@ public class MainWindowController implements LevelEditorController {
 						t.objectName = "grass";
 						t.imageURL = "res/sprites/" + t.objectName + ".png";
 						currentObject = t;
+						selectedObject = null;
 					});
 				}
 			}	
@@ -306,9 +324,22 @@ public class MainWindowController implements LevelEditorController {
 		}
 	}
 	
+	private void selectObject() {
+		for (int i = levelMap.get(currentLayer - 1).size() - 1; i >= 0; i--){
+			if (levelMap.get(currentLayer - 1).get(i).contains(mouseX / scale, mouseY / scale)) {
+				selectedObject = levelMap.get(currentLayer - 1).get(i);
+				drawGrid();
+				break;
+			}
+		}
+	}
+	
 	private void removeObject() {
 		for (int i = levelMap.get(currentLayer - 1).size() - 1; i >= 0; i--) {
 			if (levelMap.get(currentLayer - 1).get(i).contains(mouseX / scale, mouseY / scale)) {
+				if(levelMap.get(currentLayer - 1).get(i) == selectedObject) {
+					selectedObject = null;
+				}
 				levelMap.get(currentLayer - 1).remove(i);
 				break;
 			}
@@ -339,19 +370,63 @@ public class MainWindowController implements LevelEditorController {
 		}
 	}
 	
-	private void drawGrid(LevelSettings levelSettings) {
+	private ArrayList<Pixel> imageSelectedEffect(Image img) {
+		ArrayList<Pixel> list = new ArrayList<Pixel>();
+		PixelReader pr = img.getPixelReader();
+		for (int x = 0; x < img.getWidth(); x++) {
+			for (int y = 0; y < img.getHeight(); y++) {
+				Color c = pr.getColor(x, y);
+				if (c.getOpacity() > 0.1) {
+					c = new Color(1, 0, 0, 1);
+				}
+				Pixel p = new Pixel(x, y, c);
+				list.add(p);
+			}
+		}
+		return list;
+	}
+	
+	private void drawGrid() {
 		int x = (int) (mouseX / (TILE_SIZE * scale));
 		int y = (int) (mouseY / (TILE_SIZE * scale));
 		
 		GraphicsContext g = this.canvas.getGraphicsContext2D();
 		g.clearRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
 		g.setStroke(Color.GRAY);
+		
+		// Draw grid
 		for (int i = 0; i < levelSettings.width; i++) {
 			for (int j = 0; j < levelSettings.height; j++) {
 				g.strokeRect(i * TILE_SIZE * scale, j * TILE_SIZE * scale, TILE_SIZE * scale, TILE_SIZE * scale);
 			}
 		}
 		
+		// Draw selected object
+		if (selectedObject != null) {
+			double width = selectedObject.width * scale * 1.2;
+			double height = selectedObject.height * scale * 1.2;
+			double offsetX = (width - selectedObject.width * scale) / 2;
+			double offsetY = (height - selectedObject.height * scale) / 2;
+			Image img = new Image("file:" + selectedObject.imageURL, width, height, false, false);
+			ArrayList<Pixel> pixels = imageSelectedEffect(img);
+			for(int i = 0; i < pixels.size(); i++) {
+				g.setFill(pixels.get(i).color);
+				g.fillRect(scale * selectedObject.x + pixels.get(i).x - offsetX, scale * selectedObject.y + pixels.get(i).y - offsetY, 1, 1);
+			}
+		}
+		
+		// Draw images for all objects
+		for (int i = 0; i < levelMap.size(); i++) {
+			for (int j = 0; j < levelMap.get(i).size(); j++) {
+				GameObject t = levelMap.get(i).get(j);
+				if (t.imageURL != "") {
+					Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
+					g.drawImage(img, t.x * scale, t.y * scale);
+				}
+			}
+		}
+		
+		// Draw current object at cursor
 		if (currentObject != null) {
 			GameObject t = currentObject;
 			Image img = new Image("file:res/sprites/" + t.objectName + ".png", t.width * scale, t.height * scale, false, false);
@@ -361,15 +436,31 @@ public class MainWindowController implements LevelEditorController {
 				g.drawImage(img, mouseX - (t.width * scale) / 2, mouseY - (t.height * scale) / 2);
 			}
 		}
-		
-		for (int i = 0; i < levelMap.size(); i++) {
-			for (int j = 0; j < levelMap.get(i).size(); j++) {
-				GameObject t = levelMap.get(i).get(j);
-				if (t.imageURL != "") {
-					Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
-					g.drawImage(img, t.x * scale, t.y * scale);
-				}
+	}
+	
+	private void updateSelectedPosition() {
+		int x = (int) (mouseX / (TILE_SIZE * scale));
+		int y = (int) (mouseY / (TILE_SIZE * scale));
+		if (selectedObject != null) {
+			if (snapToGrid) {
+				selectedObject.x = x * TILE_SIZE;
+				selectedObject.y = y * TILE_SIZE;
+			} else {
+				selectedObject.x = mouseX / scale - selectedObject.width / 2;
+				selectedObject.y = mouseY / scale - selectedObject.height / 2;
 			}
+		}
+	}
+	
+	class Pixel {	
+		int x;
+		int y;
+		Color color;
+		
+		public Pixel(int x, int y, Color color) {
+			this.x = x;
+			this.y = y;
+			this.color = color;
 		}
 	}
 }

@@ -123,6 +123,11 @@
                         <Text layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Object" wrappingWidth="41.0" />
                      </children>
                   </Pane>
+                  <Pane prefHeight="30.0" prefWidth="56.0">
+                     <children>
+                        <Text layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select" wrappingWidth="41.0" />
+                     </children>
+                  </Pane>
                </children>
             </HBox>
          </bottom>
