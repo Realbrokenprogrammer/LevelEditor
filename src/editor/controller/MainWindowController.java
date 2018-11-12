@@ -33,6 +33,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 
 public class MainWindowController implements LevelEditorController {
@@ -56,8 +57,10 @@ public class MainWindowController implements LevelEditorController {
 	private boolean snapToGrid = true;
 	private GameObject[] allObjects;
 	private double scale = 1.0;
+	private double mouseX;
+	private double mouseY;
 	
-	private final int TILE_SIZE = 50;
+	private final int TILE_SIZE = 32;
 	
 	/*
 	Layers:
@@ -140,11 +143,19 @@ public class MainWindowController implements LevelEditorController {
 		this.objectPanel.setMinHeight(height);
 		
 		canvas.setOnMouseMoved(e -> {
-			drawGrid(levelSettings, e.getX(), e.getY());
+			mouseX = e.getX();
+			mouseY = e.getY();
+			drawGrid(levelSettings);
 		});
 		
 		canvas.setOnMouseClicked(e -> {
-			canvasClick(e.getX(), e.getY());
+			mouseX = e.getX();
+			mouseY = e.getY();
+			if (e.getButton() == MouseButton.PRIMARY) {
+				placeObject();
+			} else if (e.getButton() == MouseButton.SECONDARY) {
+				removeObject();
+			}	
 		});
 		
 		canvas.getScene().setOnKeyPressed(e -> {
@@ -181,7 +192,10 @@ public class MainWindowController implements LevelEditorController {
 	            			scale -= 0.2;	
 	            		}
 	            	}
-	            	drawGrid(levelSettings, 0, 0);
+	            	// Resize canvas
+	            	canvas.setWidth(levelSettings.width * TILE_SIZE * scale);
+	            	canvas.setHeight(levelSettings.height * TILE_SIZE * scale);
+	            	drawGrid(levelSettings);
 	            } else {
 	            	double delta = event.getDeltaY() / canvas.getHeight();
 	            	scrollPane.setVvalue(scrollPane.getVvalue() - delta * 1.5);
@@ -292,7 +306,16 @@ public class MainWindowController implements LevelEditorController {
 		}
 	}
 	
-	private void canvasClick(double mouseX, double mouseY) {
+	private void removeObject() {
+		for (int i = levelMap.get(currentLayer - 1).size() - 1; i >= 0; i--) {
+			if (levelMap.get(currentLayer - 1).get(i).contains(mouseX / scale, mouseY / scale)) {
+				levelMap.get(currentLayer - 1).remove(i);
+				break;
+			}
+		}
+	}
+	
+	private void placeObject() {
 		int x = (int) (mouseX / (TILE_SIZE * scale));
 		int y = (int) (mouseY / (TILE_SIZE * scale));
 		GraphicsContext g = this.canvas.getGraphicsContext2D();
@@ -306,8 +329,8 @@ public class MainWindowController implements LevelEditorController {
 				t.x = x * TILE_SIZE;
 				t.y = y * TILE_SIZE;
 			} else {
-				t.x = mouseX - (t.width) / 2;
-				t.y = mouseY - (t.height) / 2;
+				t.x = mouseX / scale - t.width / 2;
+				t.y = mouseY / scale - t.height / 2;
 			}
 			
 			Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
@@ -316,7 +339,7 @@ public class MainWindowController implements LevelEditorController {
 		}
 	}
 	
-	private void drawGrid(LevelSettings levelSettings, double mouseX, double mouseY) {
+	private void drawGrid(LevelSettings levelSettings) {
 		int x = (int) (mouseX / (TILE_SIZE * scale));
 		int y = (int) (mouseY / (TILE_SIZE * scale));
 		
