@@ -31,6 +31,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -64,6 +65,8 @@ public class MainWindowController implements LevelEditorController {
 	private double scale = 1.0;
 	private double mouseX;
 	private double mouseY;
+	
+	private Rectangle selectRect;
 	
 	private final int TILE_SIZE = 32;
 	
@@ -172,7 +175,20 @@ public class MainWindowController implements LevelEditorController {
 			mouseY = e.getY();
 			if(selectedObject != null) {
 				updateSelectedPosition();
-				drawGrid();
+			} else if (currentObject == null){
+				if (selectRect == null) {
+					selectRect = new Rectangle(mouseX, mouseY, 0, 0);
+				} else {
+					selectRect.setWidth(mouseX - selectRect.getX());
+					selectRect.setHeight(mouseY - selectRect.getY());
+				}
+			}
+			drawGrid();
+		});
+		
+		canvas.setOnMouseReleased(e -> {
+			if (selectRect != null) {
+				selectRect = null;	
 			}
 		});
 		
@@ -335,9 +351,11 @@ public class MainWindowController implements LevelEditorController {
 			if (levelMap.get(currentLayer - 1).get(i).contains(mouseX / scale, mouseY / scale)) {
 				selectedObject = levelMap.get(currentLayer - 1).get(i);
 				drawGrid();
-				break;
+				return;
 			}
 		}
+		selectedObject = null;
+		drawGrid();
 	}
 	
 	private void removeObject() {
@@ -372,7 +390,7 @@ public class MainWindowController implements LevelEditorController {
 			
 			Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
 			g.drawImage(img, t.x * scale, t.y * scale);
-			levelMap.get(currentLayer - 1).add(t);
+			levelMap.get(currentLayer - 1).add(t);;
 		}
 	}
 	
@@ -440,6 +458,24 @@ public class MainWindowController implements LevelEditorController {
 					}
 				}
 			}
+		}
+		
+		// Draw select rectangle
+		if (selectRect != null) {
+			g.setFill(new Color(0, 0, 1, 0.2));
+			double rY = selectRect.getY();
+			double rX = selectRect.getX();
+			double width = selectRect.getWidth();
+			double height = selectRect.getHeight();
+			if (width < 0) {
+				rX += width;
+				width *= -1;
+			}
+			if (height < 0) {
+				rY += height;
+				height *= -1;
+			}
+			g.fillRect(rX, rY, width, height);
 		}
 		
 		// Draw current object at cursor
