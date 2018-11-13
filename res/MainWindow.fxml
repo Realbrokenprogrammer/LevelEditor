@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="350.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="editor.controller.MainWindowController">
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="editor.controller.MainWindowController">
 	<children>
       <BorderPane>
          <top>
@@ -118,6 +119,14 @@
                         <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="8" wrappingWidth="13.0" />
                      </children>
                   </Pane>
+                  <HBox alignment="CENTER">
+                     <children>
+                        <CheckBox fx:id="layerCheckBox" mnemonicParsing="false" text="View only this layer" />
+                     </children>
+                     <padding>
+                        <Insets left="5.0" right="5.0" />
+                     </padding>
+                  </HBox>
                   <Pane prefHeight="30.0" prefWidth="56.0">
                      <children>
                         <Text layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Object" wrappingWidth="41.0" />
@@ -125,7 +134,7 @@
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="56.0">
                      <children>
-                        <Text layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select" wrappingWidth="41.0" />
+                        <Text layoutX="10.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select" wrappingWidth="41.0" />
                      </children>
                   </Pane>
                </children>

@@ -19,6 +19,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -49,6 +50,7 @@ public class MainWindowController implements LevelEditorController {
 	@FXML public StackPane stackPane;
 	@FXML public ScrollPane objectScroll;
 	@FXML public HBox objectBar;
+	@FXML public CheckBox layerCheckBox;
 	
 	private ArrayList<ArrayList<GameObject>> levelMap;
 	private LevelSettings levelSettings;
@@ -102,7 +104,6 @@ public class MainWindowController implements LevelEditorController {
 		AnchorPane.setRightAnchor(stackPane, 0.0);
 		
 		initAllObjects();
-		
 		initObjectPanel();
 		
 		menuFileNew.setOnAction(e -> {
@@ -194,6 +195,10 @@ public class MainWindowController implements LevelEditorController {
 			}
 		});
 		
+		layerCheckBox.setOnAction(e -> {
+			drawGrid();
+		});
+		
 		canvas.getScene().addEventFilter(ScrollEvent.ANY, new EventHandler<ScrollEvent>() {
 	        @Override
 	        public void handle(ScrollEvent event) {
@@ -236,7 +241,7 @@ public class MainWindowController implements LevelEditorController {
 				}
 			});
 			p.setOnMouseClicked(e -> {
-				if (index < list.size() - 2) {
+				if (index < 9) {
 					Text t = (Text) p.getChildren().get(0);
 					currentLayer = Integer.parseInt(t.getText());
 					for(int j = 1; j < list.size(); j++) {
@@ -244,6 +249,7 @@ public class MainWindowController implements LevelEditorController {
 						pane.setStyle("-fx-background-color: #FFFFFF");
 					}
 					p.setStyle("-fx-background-color: #CCCCCC");
+					drawGrid();
 				} else if (index == list.size() - 2) {
 					if (objectScroll.isVisible()) {
 						objectScroll.setVisible(false);
@@ -416,12 +422,22 @@ public class MainWindowController implements LevelEditorController {
 		}
 		
 		// Draw images for all objects
-		for (int i = 0; i < levelMap.size(); i++) {
-			for (int j = 0; j < levelMap.get(i).size(); j++) {
-				GameObject t = levelMap.get(i).get(j);
+		if (layerCheckBox.isSelected()) {
+			for (int i = 0; i < levelMap.get(currentLayer - 1).size(); i++) {
+				GameObject t = levelMap.get(currentLayer - 1).get(i);
 				if (t.imageURL != "") {
 					Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
 					g.drawImage(img, t.x * scale, t.y * scale);
+				}
+			}
+		} else {
+			for (int i = 0; i < levelMap.size(); i++) {
+				for (int j = 0; j < levelMap.get(i).size(); j++) {
+					GameObject t = levelMap.get(i).get(j);
+					if (t.imageURL != "") {
+						Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
+						g.drawImage(img, t.x * scale, t.y * scale);
+					}
 				}
 			}
 		}
