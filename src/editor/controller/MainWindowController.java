@@ -58,7 +58,8 @@ public class MainWindowController implements LevelEditorController {
 	private int currentLayer = 4;
 	private int currentObjectType = 0;
 	private GameObject currentObject = null;
-	private GameObject selectedObject = null;
+	private GameObject dragObject = null;
+	private ArrayList<GameObject> selectedObjects = null;
 	private boolean ctrlIsDown = false;
 	private boolean snapToGrid = true;
 	private GameObject[] allObjects;
@@ -67,6 +68,7 @@ public class MainWindowController implements LevelEditorController {
 	private double mouseY;
 	
 	private Rectangle selectRect;
+	private boolean isSelecting = false;
 	
 	private final int TILE_SIZE = 32;
 	
@@ -139,6 +141,7 @@ public class MainWindowController implements LevelEditorController {
 		for (int i = 0; i < 8; i++) {
 			levelMap.add(new ArrayList<GameObject>());
 		}
+		this.selectedObjects = new ArrayList<GameObject>();
 		this.canvas.setWidth(levelSettings.width * TILE_SIZE + 15);
 		this.canvas.setHeight(levelSettings.height * TILE_SIZE + 15);
 		Stage stage = (Stage) this.canvas.getScene().getWindow();
@@ -173,20 +176,24 @@ public class MainWindowController implements LevelEditorController {
 		canvas.setOnMouseDragged(e -> {
 			mouseX = e.getX();
 			mouseY = e.getY();
-			if(selectedObject != null) {
+			if(!isSelecting && selectedObjects.size() > 0) {
 				updateSelectedPosition();
 			} else if (currentObject == null){
 				if (selectRect == null) {
 					selectRect = new Rectangle(mouseX, mouseY, 0, 0);
+					isSelecting = true;
 				} else {
 					selectRect.setWidth(mouseX - selectRect.getX());
 					selectRect.setHeight(mouseY - selectRect.getY());
+					setObjectsWithinRect();
 				}
 			}
 			drawGrid();
 		});
 		
 		canvas.setOnMouseReleased(e -> {
+			isSelecting = false;
+			dragObject = null;
 			if (selectRect != null) {
 				selectRect = null;	
 			}
@@ -337,7 +344,7 @@ public class MainWindowController implements LevelEditorController {
 						t.objectName = "grass";
 						t.imageURL = "res/sprites/" + t.objectName + ".png";
 						currentObject = t;
-						selectedObject = null;
+						selectedObjects.clear();
 					});
 				}
 			}	
@@ -346,23 +353,38 @@ public class MainWindowController implements LevelEditorController {
 		}
 	}
 	
+	private void setObjectsWithinRect() {
+		selectedObjects.clear();
+		Rectangle r = getAdjustedRect();
+		for (int i = 0; i < levelMap.get(currentLayer - 1).size(); i++) {
+			GameObject o = levelMap.get(currentLayer - 1).get(i);
+			if (r.intersects(o.x * scale, o.y * scale, o.width * scale, o.height * scale)) {
+				selectedObjects.add(o);
+			}
+		}
+	}
+	
 	private void selectObject() {
 		for (int i = levelMap.get(currentLayer - 1).size() - 1; i >= 0; i--){
-			if (levelMap.get(currentLayer - 1).get(i).contains(mouseX / scale, mouseY / scale)) {
-				selectedObject = levelMap.get(currentLayer - 1).get(i);
+			GameObject o = levelMap.get(currentLayer - 1).get(i);
+			if (o.contains(mouseX / scale, mouseY / scale)) {
+				if (!selectedObjects.contains(o)){
+					selectedObjects.clear();
+					selectedObjects.add(o);
+				}
 				drawGrid();
 				return;
 			}
 		}
-		selectedObject = null;
+		selectedObjects.clear();
 		drawGrid();
 	}
 	
 	private void removeObject() {
 		for (int i = levelMap.get(currentLayer - 1).size() - 1; i >= 0; i--) {
 			if (levelMap.get(currentLayer - 1).get(i).contains(mouseX / scale, mouseY / scale)) {
-				if(levelMap.get(currentLayer - 1).get(i) == selectedObject) {
-					selectedObject = null;
+				if(levelMap.get(currentLayer - 1).get(i) == selectedObjects.get(0)) {
+					selectedObjects.clear();
 				}
 				levelMap.get(currentLayer - 1).remove(i);
 				break;
@@ -425,19 +447,20 @@ public class MainWindowController implements LevelEditorController {
 			}
 		}
 		
-		// Draw selected object
-		if (selectedObject != null) {
-			double width = selectedObject.width * scale * 1.2;
-			double height = selectedObject.height * scale * 1.2;
-			double offsetX = (width - selectedObject.width * scale) / 2;
-			double offsetY = (height - selectedObject.height * scale) / 2;
-			Image img = new Image("file:" + selectedObject.imageURL, width, height, false, false);
+		// Draw selected objects
+		for (int i = 0; i < selectedObjects.size(); i++) {
+			double width = selectedObjects.get(i).width * scale * 1.2;
+			double height = selectedObjects.get(i).height * scale * 1.2;
+			double offsetX = (width - selectedObjects.get(i).width * scale) / 2;
+			double offsetY = (height - selectedObjects.get(i).height * scale) / 2;
+			Image img = new Image("file:" + selectedObjects.get(i).imageURL, width, height, false, false);
 			ArrayList<Pixel> pixels = imageSelectedEffect(img);
-			for(int i = 0; i < pixels.size(); i++) {
-				g.setFill(pixels.get(i).color);
-				g.fillRect(scale * selectedObject.x + pixels.get(i).x - offsetX, scale * selectedObject.y + pixels.get(i).y - offsetY, 1, 1);
+			for(int j = 0; j < pixels.size(); j++) {
+				g.setFill(pixels.get(j).color);
+				g.fillRect(scale * selectedObjects.get(i).x + pixels.get(j).x - offsetX, scale * selectedObjects.get(i).y + pixels.get(j).y - offsetY, 1, 1);
 			}
 		}
+			
 		
 		// Draw images for all objects
 		if (layerCheckBox.isSelected()) {
@@ -463,19 +486,8 @@ public class MainWindowController implements LevelEditorController {
 		// Draw select rectangle
 		if (selectRect != null) {
 			g.setFill(new Color(0, 0, 1, 0.2));
-			double rY = selectRect.getY();
-			double rX = selectRect.getX();
-			double width = selectRect.getWidth();
-			double height = selectRect.getHeight();
-			if (width < 0) {
-				rX += width;
-				width *= -1;
-			}
-			if (height < 0) {
-				rY += height;
-				height *= -1;
-			}
-			g.fillRect(rX, rY, width, height);
+			Rectangle r = getAdjustedRect();
+			g.fillRect(r.getX(), r.getY(), r.getWidth(), r.getHeight());
 		}
 		
 		// Draw current object at cursor
@@ -490,17 +502,48 @@ public class MainWindowController implements LevelEditorController {
 		}
 	}
 	
+	private Rectangle getAdjustedRect() {
+		double rY = selectRect.getY();
+		double rX = selectRect.getX();
+		double width = selectRect.getWidth();
+		double height = selectRect.getHeight();
+		if (width < 0) {
+			rX += width;
+			width *= -1;
+		}
+		if (height < 0) {
+			rY += height;
+			height *= -1;
+		}
+		return new Rectangle(rX, rY, width, height);
+	}
+	
 	private void updateSelectedPosition() {
 		int x = (int) (mouseX / (TILE_SIZE * scale));
 		int y = (int) (mouseY / (TILE_SIZE * scale));
-		if (selectedObject != null) {
-			if (snapToGrid) {
-				selectedObject.x = x * TILE_SIZE;
-				selectedObject.y = y * TILE_SIZE;
-			} else {
-				selectedObject.x = mouseX / scale - selectedObject.width / 2;
-				selectedObject.y = mouseY / scale - selectedObject.height / 2;
+		if (dragObject == null) {
+			for (int i = 0; i < selectedObjects.size(); i++) {
+				if (selectedObjects.get(i).contains(mouseX / scale, mouseY / scale)) {
+					dragObject = selectedObjects.get(i);
+					break;
+				}
 			}
+		}
+		
+		
+		double deltaX;
+		double deltaY;
+		if (snapToGrid) {
+			deltaX = x * TILE_SIZE - dragObject.x;
+			deltaY = y * TILE_SIZE - dragObject.y;
+		} else {
+			deltaX = (mouseX / scale - dragObject.width / 2) - dragObject.x;
+			deltaY = (mouseY / scale - dragObject.height / 2) - dragObject.y;
+		}
+		
+		for (int i = 0; i < selectedObjects.size(); i++) {
+			selectedObjects.get(i).x += deltaX;
+			selectedObjects.get(i).y += deltaY;
 		}
 	}
 	
