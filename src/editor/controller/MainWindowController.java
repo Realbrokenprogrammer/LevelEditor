@@ -60,6 +60,7 @@ public class MainWindowController implements LevelEditorController {
 	private GameObject currentObject = null;
 	private GameObject dragObject = null;
 	private ArrayList<GameObject> selectedObjects = null;
+	private ArrayList<GameObject> clipboard = null;
 	private boolean ctrlIsDown = false;
 	private boolean snapToGrid = true;
 	private GameObject[] allObjects;
@@ -71,36 +72,6 @@ public class MainWindowController implements LevelEditorController {
 	private boolean isSelecting = false;
 	
 	private final int TILE_SIZE = 32;
-	
-	/*
-	Layers:
-	1 - Foreground General 2
-		Tiles can't be placed here. Objects can't kill you. This is most for foreground looks / paralax.
-	2 - Foreground Tile
-		Tile layer that goes over the main ground layer. Might be used to hide things. Player won't interract with this.
-	3 - Foreground Tile General
-		Can't place tiles here but you can place objects.
-	4 - Active Tile
-		Everything is collideable here. Player will interract with objects and tiles here.
-	5 - Back Tile General
-		Mostly for objects. Things you want to place behind walls like traps etc.
-	6 - Back Tile
-		Background tiles.
-	7 - Back General 2
-		For paralax.
-	8 - Back General 3
-		For background.
-	
-	Props:
-		* Rocks
-	Animated props:
-		* Rain
-		* Clouds
-	Objects: - Usually things you interract with or kill you.
-		* End level object. (Object you touch to "win")
-		* Traps, saws, lava.
-		NOTE: Should be able to set a start and finish destination to make the object move between those positions.
-*/
 	
 	@FXML public void initialize() {
 		AnchorPane.setTopAnchor(stackPane, 0.0);
@@ -142,6 +113,7 @@ public class MainWindowController implements LevelEditorController {
 			levelMap.add(new ArrayList<GameObject>());
 		}
 		this.selectedObjects = new ArrayList<GameObject>();
+		this.clipboard = new ArrayList<GameObject>();
 		this.canvas.setWidth(levelSettings.width * TILE_SIZE + 15);
 		this.canvas.setHeight(levelSettings.height * TILE_SIZE + 15);
 		Stage stage = (Stage) this.canvas.getScene().getWindow();
@@ -202,6 +174,28 @@ public class MainWindowController implements LevelEditorController {
 		canvas.getScene().setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.CONTROL) {
 				ctrlIsDown = true;
+			}
+			// Copy
+			if (e.getCode() == KeyCode.C && ctrlIsDown) {
+				clipboard.clear();
+				for (int i = 0; i < selectedObjects.size(); i++) {
+					clipboard.add(selectedObjects.get(i));
+				}
+			}
+			// Paste
+			if (e.getCode() == KeyCode.V && ctrlIsDown) {
+				for (int i = 0; i < clipboard.size(); i++) {
+					GameObject o = new GameObject();
+					o.height = clipboard.get(i).height;
+					o.width = clipboard.get(i).width;
+					o.x = clipboard.get(i).x + 10;
+					o.y = clipboard.get(i).y + 10;
+					o.imageURL = clipboard.get(i).imageURL;
+					o.type = clipboard.get(i).type;
+					o.objectName = clipboard.get(i).objectName;
+					levelMap.get(currentLayer - 1).add(o);
+				}
+				drawGrid();
 			}
 		});
 		
