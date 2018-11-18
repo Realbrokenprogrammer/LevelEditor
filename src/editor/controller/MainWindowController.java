@@ -24,7 +24,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelReader;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -294,7 +293,8 @@ public class MainWindowController implements LevelEditorController {
 	private void initAllObjects() {
 		GameObject grass = new GameObject();
 		grass.type = ObjectType.TILE;
-		grass.objectName = "grass";	
+		grass.objectName = "grass";
+		grass.imageURL = "res/sprites/" + grass.objectName + ".png";
 		GameObject[] temp = {grass};
 		allObjects = temp;
 	}
@@ -348,6 +348,7 @@ public class MainWindowController implements LevelEditorController {
 						t.type = ObjectType.TILE;
 						t.objectName = "grass";
 						t.imageURL = "res/sprites/" + t.objectName + ".png";
+						t.selectedImageURL = "res/sprites/selected" + t.objectName + ".png";
 						currentObject = t;
 						selectedObjects.clear();
 					});
@@ -406,6 +407,7 @@ public class MainWindowController implements LevelEditorController {
 			t.type = currentObject.type;
 			t.objectName = currentObject.objectName;
 			t.imageURL = "res/sprites/" + t.objectName + ".png";
+			t.selectedImageURL = "res/sprites/selected" + t.objectName + ".png";
 			
 			if (snapToGrid) {
 				t.x = x * TILE_SIZE;
@@ -433,22 +435,6 @@ public class MainWindowController implements LevelEditorController {
 		return true;
 	}
 	
-	private ArrayList<Pixel> imageSelectedEffect(Image img) {
-		ArrayList<Pixel> list = new ArrayList<Pixel>();
-		PixelReader pr = img.getPixelReader();
-		for (int x = 0; x < img.getWidth(); x++) {
-			for (int y = 0; y < img.getHeight(); y++) {
-				Color c = pr.getColor(x, y);
-				if (c.getOpacity() > 0.1) {
-					c = new Color(1, 0, 0, 1);
-				}
-				Pixel p = new Pixel(x, y, c);
-				list.add(p);
-			}
-		}
-		return list;
-	}
-	
 	private void drawGrid() {
 		int x = (int) (mouseX / (TILE_SIZE * scale));
 		int y = (int) (mouseY / (TILE_SIZE * scale));
@@ -463,12 +449,6 @@ public class MainWindowController implements LevelEditorController {
 				g.strokeRect(i * TILE_SIZE * scale, j * TILE_SIZE * scale, TILE_SIZE * scale, TILE_SIZE * scale);
 			}
 		}
-		
-		// Draw selected objects
-		for (int i = 0; i < selectedObjects.size(); i++) {
-			drawSelectedObject(g, selectedObjects.get(i));
-		}
-			
 		
 		// Draw images for all objects
 		if (layerCheckBox.isSelected()) {
@@ -491,6 +471,13 @@ public class MainWindowController implements LevelEditorController {
 			}
 		}
 		
+		// Draw selected objects
+		for (int i = 0; i < selectedObjects.size(); i++) {
+			GameObject t = selectedObjects.get(i);
+			Image img = new Image("file:" + t.selectedImageURL, t.width * scale, t.height * scale, false, false);
+			g.drawImage(img, t.x * scale, t.y * scale);
+		}	
+		
 		// Draw select rectangle
 		if (selectRect != null) {
 			g.setFill(new Color(0, 0, 1, 0.2));
@@ -507,19 +494,6 @@ public class MainWindowController implements LevelEditorController {
 			} else {
 				g.drawImage(img, mouseX - (t.width * scale) / 2, mouseY - (t.height * scale) / 2);
 			}
-		}
-	}
-	
-	private void drawSelectedObject(GraphicsContext g, GameObject o) {
-		double width = o.width * scale * 1.2;
-		double height = o.height * scale * 1.2;
-		double offsetX = (width - o.width * scale) / 2;
-		double offsetY = (height - o.height * scale) / 2;
-		Image img = new Image("file:" + o.imageURL, width, height, false, false);
-		ArrayList<Pixel> pixels = imageSelectedEffect(img);
-		for(int j = 0; j < pixels.size(); j++) {
-			g.setFill(pixels.get(j).color);
-			g.fillRect(scale * o.x + pixels.get(j).x - offsetX, scale * o.y + pixels.get(j).y - offsetY, 1, 1);
 		}
 	}
 	
@@ -564,18 +538,6 @@ public class MainWindowController implements LevelEditorController {
 		for (int i = 0; i < selectedObjects.size(); i++) {
 			selectedObjects.get(i).x += deltaX;
 			selectedObjects.get(i).y += deltaY;
-		}
-	}
-	
-	class Pixel {	
-		int x;
-		int y;
-		Color color;
-		
-		public Pixel(int x, int y, Color color) {
-			this.x = x;
-			this.y = y;
-			this.color = color;
 		}
 	}
 }
