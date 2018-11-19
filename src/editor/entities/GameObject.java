@@ -6,7 +6,7 @@ public class GameObject {
 	public double width = 32;
 	public double height = 32;
 	public String imageURL = "";
-	public String selectedImageURL = "";
+	public Pixel[][] selectedPixels;
 	public ObjectType type = null;
 	public String objectName = "";
 	

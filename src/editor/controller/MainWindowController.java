@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import editor.entities.GameObject;
 import editor.entities.ObjectType;
+import editor.entities.Pixel;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -24,6 +25,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -39,19 +41,30 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 
 public class MainWindowController implements LevelEditorController {
-	
-	@FXML public VBox root;
-	@FXML public MenuItem menuFileNew;
-	@FXML public Canvas canvas;
-	@FXML public ScrollPane scrollPane;
-	@FXML public AnchorPane anchorPane;
-	@FXML public HBox layerBar;
-	@FXML public VBox objectPanel;
-	@FXML public StackPane stackPane;
-	@FXML public ScrollPane objectScroll;
-	@FXML public HBox objectBar;
-	@FXML public CheckBox layerCheckBox;
-	
+
+	@FXML
+	public VBox root;
+	@FXML
+	public MenuItem menuFileNew;
+	@FXML
+	public Canvas canvas;
+	@FXML
+	public ScrollPane scrollPane;
+	@FXML
+	public AnchorPane anchorPane;
+	@FXML
+	public HBox layerBar;
+	@FXML
+	public VBox objectPanel;
+	@FXML
+	public StackPane stackPane;
+	@FXML
+	public ScrollPane objectScroll;
+	@FXML
+	public HBox objectBar;
+	@FXML
+	public CheckBox layerCheckBox;
+
 	private ArrayList<ArrayList<GameObject>> levelMap;
 	private LevelSettings levelSettings;
 	private int currentLayer = 4;
@@ -66,37 +79,38 @@ public class MainWindowController implements LevelEditorController {
 	private double scale = 1.0;
 	private double mouseX;
 	private double mouseY;
-	
+
 	private Rectangle selectRect;
 	private boolean isSelecting = false;
-	
+
 	private final int TILE_SIZE = 32;
-	
-	@FXML public void initialize() {
+
+	@FXML
+	public void initialize() {
 		AnchorPane.setTopAnchor(stackPane, 0.0);
 		AnchorPane.setBottomAnchor(stackPane, 0.0);
 		AnchorPane.setLeftAnchor(stackPane, 0.0);
 		AnchorPane.setRightAnchor(stackPane, 0.0);
-		
+
 		initAllObjects();
 		initObjectPanel();
-		
+
 		menuFileNew.setOnAction(e -> {
 			Parent root;
 			URI location = new File("res/" + LEVEL_SETTINGS_WINDOW).toURI();
 			LevelSettingsWindowController levelSettingsWindowController;
-			
+
 			try {
 				FXMLLoader loader = new FXMLLoader(location.toURL());
 				root = loader.load();
-				
+
 				Stage stage = new Stage();
 				stage.setTitle("Level Settings");
 				stage.setScene(new Scene(root));
-				
+
 				levelSettingsWindowController = loader.<LevelSettingsWindowController>getController();
 				levelSettingsWindowController.getSettings(this);
-				
+
 				stage.initModality(Modality.APPLICATION_MODAL);
 				stage.show();
 			} catch (IOException exception) {
@@ -104,7 +118,7 @@ public class MainWindowController implements LevelEditorController {
 			}
 		});
 	}
-	
+
 	public void setNewLevel(LevelSettings levelSettings) {
 		this.levelSettings = levelSettings;
 		this.levelMap = new ArrayList<ArrayList<GameObject>>();
@@ -121,15 +135,15 @@ public class MainWindowController implements LevelEditorController {
 		double height = screenSize.getHeight() * 0.7;
 		stage.setWidth(width);
 		stage.setHeight(height);
-		
+
 		this.objectPanel.setMinHeight(height);
-		
+
 		canvas.setOnMouseMoved(e -> {
 			mouseX = e.getX();
 			mouseY = e.getY();
 			drawGrid();
 		});
-		
+
 		canvas.setOnMousePressed(e -> {
 			mouseX = e.getX();
 			mouseY = e.getY();
@@ -145,13 +159,15 @@ public class MainWindowController implements LevelEditorController {
 				drawGrid();
 			}
 		});
-		
+
 		canvas.setOnMouseDragged(e -> {
 			mouseX = e.getX();
 			mouseY = e.getY();
-			if(!isSelecting && selectedObjects.size() > 0) { // dragging selected objects
+			if (!isSelecting && selectedObjects.size() > 0) { // dragging
+																// selected
+																// objects
 				updateSelectedPosition();
-			} else if (currentObject == null){ // dragging select rect
+			} else if (currentObject == null) { // dragging select rect
 				if (selectRect == null) {
 					selectRect = new Rectangle(mouseX, mouseY, 0, 0);
 					isSelecting = true;
@@ -160,20 +176,20 @@ public class MainWindowController implements LevelEditorController {
 					selectRect.setHeight(mouseY - selectRect.getY());
 					setObjectsWithinRect();
 				}
-			} else if (e.getButton() == MouseButton.PRIMARY && snapToGrid){
+			} else if (e.getButton() == MouseButton.PRIMARY && snapToGrid) {
 				placeObject();
 			}
 			drawGrid();
 		});
-		
+
 		canvas.setOnMouseReleased(e -> {
 			isSelecting = false;
 			dragObject = null;
 			if (selectRect != null) {
-				selectRect = null;	
+				selectRect = null;
 			}
 		});
-		
+
 		canvas.getScene().setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.CONTROL) {
 				ctrlIsDown = true;
@@ -196,7 +212,7 @@ public class MainWindowController implements LevelEditorController {
 				drawGrid();
 			}
 		});
-		
+
 		canvas.getScene().setOnKeyReleased(e -> {
 			if (e.getCode() == KeyCode.CONTROL) {
 				ctrlIsDown = false;
@@ -209,49 +225,55 @@ public class MainWindowController implements LevelEditorController {
 				}
 			}
 		});
-		
+
 		layerCheckBox.setOnAction(e -> {
 			drawGrid();
 		});
-		
+
 		canvas.getScene().addEventFilter(ScrollEvent.ANY, new EventHandler<ScrollEvent>() {
-	        @Override
-	        public void handle(ScrollEvent event) {
-	            if (ctrlIsDown) {
-	            	if (event.getDeltaY() > 0) {
-	            		// Zoom in
-	            		if (scale < 3) {
-	            			scale += 0.2;
-	            		}
-	            	} else {
-	            		// Zoom out
-	            		if (scale > 0.6) {
-	            			scale -= 0.2;	
-	            		}
-	            	}
-	            	// Resize canvas
-	            	canvas.setWidth(levelSettings.width * TILE_SIZE * scale);
-	            	canvas.setHeight(levelSettings.height * TILE_SIZE * scale);
-	            	drawGrid();
-	            } else {
-	            	double delta = event.getDeltaY() / canvas.getHeight();
-	            	scrollPane.setVvalue(scrollPane.getVvalue() - delta * 1.5);
-	            }
-	            event.consume();
-	        }
+			@Override
+			public void handle(ScrollEvent event) {
+				if (ctrlIsDown) {
+					if (event.getDeltaY() > 0) {
+						// Zoom in
+						if (scale < 3) {
+							scale += 0.2;
+						}
+					} else {
+						// Zoom out
+						if (scale > 0.6) {
+							scale -= 0.2;
+						}
+					}
+					for (int i = 0; i < allObjects.length; i++) {
+						allObjects[i].selectedPixels = sobel(new Image("file:" + allObjects[i].imageURL, 
+								allObjects[i].width * scale, 
+								allObjects[i].height * scale, 
+								false, false));
+					}
+					// Resize canvas
+					canvas.setWidth(levelSettings.width * TILE_SIZE * scale);
+					canvas.setHeight(levelSettings.height * TILE_SIZE * scale);
+					drawGrid();
+				} else {
+					double delta = event.getDeltaY() / canvas.getHeight();
+					scrollPane.setVvalue(scrollPane.getVvalue() - delta * 1.5);
+				}
+				event.consume();
+			}
 		});
-		
+
 		ObservableList<Node> list = layerBar.getChildren();
 		Pane firstPane = (Pane) list.get(currentLayer);
 		firstPane.setStyle("-fx-background-color: #CCCCCC");
-		for(int i = 1; i < list.size(); i++) {
+		for (int i = 1; i < list.size(); i++) {
 			Pane p = (Pane) list.get(i);
 			final int index = i;
 			p.setOnMouseEntered(e -> {
 				p.setStyle("-fx-background-color: #CCCCCC");
 			});
 			p.setOnMouseExited(e -> {
-				if(index != currentLayer) {
+				if (index != currentLayer) {
 					p.setStyle("-fx-background-color: #FFFFFF");
 				}
 			});
@@ -259,7 +281,7 @@ public class MainWindowController implements LevelEditorController {
 				if (index < 9) {
 					Text t = (Text) p.getChildren().get(0);
 					currentLayer = Integer.parseInt(t.getText());
-					for(int j = 1; j < list.size(); j++) {
+					for (int j = 1; j < list.size(); j++) {
 						Pane pane = (Pane) list.get(j);
 						pane.setStyle("-fx-background-color: #FFFFFF");
 					}
@@ -277,7 +299,7 @@ public class MainWindowController implements LevelEditorController {
 			});
 		}
 	}
-	
+
 	private GameObject copyGameObject(GameObject o) {
 		GameObject result = new GameObject();
 		result.height = o.height;
@@ -289,26 +311,27 @@ public class MainWindowController implements LevelEditorController {
 		result.objectName = o.objectName;
 		return result;
 	}
-	
+
 	private void initAllObjects() {
 		GameObject grass = new GameObject();
 		grass.type = ObjectType.TILE;
 		grass.objectName = "grass";
 		grass.imageURL = "res/sprites/" + grass.objectName + ".png";
-		GameObject[] temp = {grass};
+		grass.selectedPixels = sobel(new Image("file:" + grass.imageURL, grass.width * scale, grass.height * scale, false, false));
+		GameObject[] temp = { grass };
 		allObjects = temp;
 	}
-	
+
 	private void initObjectPanel() {
 		objectPanel.setStyle("-fx-background-color: #CCCCCC");
 		objectBar.setStyle("-fx-background-color: #FFFFFF");
 		objectBar.setTranslateX(-10);
-		
+
 		addGameObjectContent(0);
-		
+
 		ObservableList<Node> list = objectBar.getChildren();
 		list.get(0).setStyle("-fx-background-color: #CCCCCC");
-		for(int i = 0; i < list.size(); i++) {
+		for (int i = 0; i < list.size(); i++) {
 			final int index = i;
 			Pane p = (Pane) list.get(i);
 			p.setOnMouseEntered(e -> {
@@ -316,7 +339,7 @@ public class MainWindowController implements LevelEditorController {
 			});
 			p.setOnMouseExited(e -> {
 				if (index != currentObjectType) {
-					p.setStyle("-fx-background-color: #FFFFFF");	
+					p.setStyle("-fx-background-color: #FFFFFF");
 				}
 			});
 			p.setOnMouseClicked(e -> {
@@ -332,11 +355,11 @@ public class MainWindowController implements LevelEditorController {
 			});
 		}
 	}
-	
+
 	private void addGameObjectContent(int index) {
-		if(index == 0) {
+		if (index == 0) {
 			for (int i = 0; i < this.allObjects.length; i++) {
-				if(allObjects[i].type == ObjectType.TILE) {
+				if (allObjects[i].type == ObjectType.TILE) {
 					ImageView iv = new ImageView();
 					objectPanel.setSpacing(10);
 					objectPanel.setPadding(new Insets(0, 10, 10, 10));
@@ -348,17 +371,16 @@ public class MainWindowController implements LevelEditorController {
 						t.type = ObjectType.TILE;
 						t.objectName = "grass";
 						t.imageURL = "res/sprites/" + t.objectName + ".png";
-						t.selectedImageURL = "res/sprites/selected" + t.objectName + ".png";
 						currentObject = t;
 						selectedObjects.clear();
 					});
 				}
-			}	
-		} else if(index == 1) {
-			
+			}
+		} else if (index == 1) {
+
 		}
 	}
-	
+
 	private void setObjectsWithinRect() {
 		selectedObjects.clear();
 		Rectangle r = getAdjustedRect();
@@ -369,12 +391,12 @@ public class MainWindowController implements LevelEditorController {
 			}
 		}
 	}
-	
+
 	private void selectObject() {
-		for (int i = levelMap.get(currentLayer - 1).size() - 1; i >= 0; i--){
+		for (int i = levelMap.get(currentLayer - 1).size() - 1; i >= 0; i--) {
 			GameObject o = levelMap.get(currentLayer - 1).get(i);
 			if (o.contains(mouseX / scale, mouseY / scale)) {
-				if (!selectedObjects.contains(o)){
+				if (!selectedObjects.contains(o)) {
 					selectedObjects.clear();
 					selectedObjects.add(o);
 				}
@@ -385,11 +407,11 @@ public class MainWindowController implements LevelEditorController {
 		selectedObjects.clear();
 		drawGrid();
 	}
-	
+
 	private void removeObject() {
 		for (int i = levelMap.get(currentLayer - 1).size() - 1; i >= 0; i--) {
 			if (levelMap.get(currentLayer - 1).get(i).contains(mouseX / scale, mouseY / scale)) {
-				if(selectedObjects.contains(levelMap.get(currentLayer - 1).get(i))) {
+				if (selectedObjects.contains(levelMap.get(currentLayer - 1).get(i))) {
 					selectedObjects.remove(levelMap.get(currentLayer - 1).get(i));
 				}
 				levelMap.get(currentLayer - 1).remove(i);
@@ -397,7 +419,7 @@ public class MainWindowController implements LevelEditorController {
 			}
 		}
 	}
-	
+
 	private void placeObject() {
 		int x = (int) (mouseX / (TILE_SIZE * scale));
 		int y = (int) (mouseY / (TILE_SIZE * scale));
@@ -407,8 +429,7 @@ public class MainWindowController implements LevelEditorController {
 			t.type = currentObject.type;
 			t.objectName = currentObject.objectName;
 			t.imageURL = "res/sprites/" + t.objectName + ".png";
-			t.selectedImageURL = "res/sprites/selected" + t.objectName + ".png";
-			
+
 			if (snapToGrid) {
 				t.x = x * TILE_SIZE;
 				t.y = y * TILE_SIZE;
@@ -416,7 +437,7 @@ public class MainWindowController implements LevelEditorController {
 				t.x = mouseX / scale - t.width / 2;
 				t.y = mouseY / scale - t.height / 2;
 			}
-			
+
 			if (isPositionFree(t.x, t.y)) {
 				Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
 				g.drawImage(img, t.x * scale, t.y * scale);
@@ -424,7 +445,7 @@ public class MainWindowController implements LevelEditorController {
 			}
 		}
 	}
-	
+
 	private boolean isPositionFree(double x, double y) {
 		for (int i = 0; i < levelMap.get(currentLayer - 1).size(); i++) {
 			GameObject o = levelMap.get(currentLayer - 1).get(i);
@@ -434,22 +455,22 @@ public class MainWindowController implements LevelEditorController {
 		}
 		return true;
 	}
-	
+
 	private void drawGrid() {
 		int x = (int) (mouseX / (TILE_SIZE * scale));
 		int y = (int) (mouseY / (TILE_SIZE * scale));
-		
+
 		GraphicsContext g = this.canvas.getGraphicsContext2D();
 		g.clearRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
 		g.setStroke(Color.GRAY);
-		
+
 		// Draw grid
 		for (int i = 0; i < levelSettings.width; i++) {
 			for (int j = 0; j < levelSettings.height; j++) {
 				g.strokeRect(i * TILE_SIZE * scale, j * TILE_SIZE * scale, TILE_SIZE * scale, TILE_SIZE * scale);
 			}
 		}
-		
+
 		// Draw images for all objects
 		if (layerCheckBox.isSelected()) {
 			for (int i = 0; i < levelMap.get(currentLayer - 1).size(); i++) {
@@ -470,25 +491,37 @@ public class MainWindowController implements LevelEditorController {
 				}
 			}
 		}
-		
+
 		// Draw selected objects
 		for (int i = 0; i < selectedObjects.size(); i++) {
 			GameObject t = selectedObjects.get(i);
-			Image img = new Image("file:" + t.selectedImageURL, t.width * scale, t.height * scale, false, false);
-			g.drawImage(img, t.x * scale, t.y * scale);
-		}	
-		
+			Pixel[][] pixels = null;
+			for (int j = 0; j < allObjects.length; j++) {
+				if (t.objectName == allObjects[j].objectName) {
+					pixels = allObjects[j].selectedPixels;
+					break;
+				}
+			}
+			for (int j = 1; j < pixels.length-1; j++) {
+				for (int k = 1; k < pixels[j].length-1; k++) {
+					g.setFill(pixels[j][k].color);
+					g.fillRect(t.x * scale + pixels[j][k].x, t.y * scale + pixels[j][k].y, 1, 1);
+				}
+			}
+		}
+
 		// Draw select rectangle
 		if (selectRect != null) {
 			g.setFill(new Color(0, 0, 1, 0.2));
 			Rectangle r = getAdjustedRect();
 			g.fillRect(r.getX(), r.getY(), r.getWidth(), r.getHeight());
 		}
-		
+
 		// Draw current object at cursor
 		if (currentObject != null) {
 			GameObject t = currentObject;
-			Image img = new Image("file:res/sprites/" + t.objectName + ".png", t.width * scale, t.height * scale, false, false);
+			Image img = new Image("file:res/sprites/" + t.objectName + ".png", t.width * scale, t.height * scale, false,
+					false);
 			if (snapToGrid) {
 				g.drawImage(img, x * TILE_SIZE * scale, y * TILE_SIZE * scale);
 			} else {
@@ -496,7 +529,7 @@ public class MainWindowController implements LevelEditorController {
 			}
 		}
 	}
-	
+
 	private Rectangle getAdjustedRect() {
 		double rY = selectRect.getY();
 		double rX = selectRect.getX();
@@ -512,7 +545,7 @@ public class MainWindowController implements LevelEditorController {
 		}
 		return new Rectangle(rX, rY, width, height);
 	}
-	
+
 	private void updateSelectedPosition() {
 		int x = (int) (mouseX / (TILE_SIZE * scale));
 		int y = (int) (mouseY / (TILE_SIZE * scale));
@@ -524,7 +557,7 @@ public class MainWindowController implements LevelEditorController {
 				}
 			}
 		}
-		
+
 		double deltaX;
 		double deltaY;
 		if (snapToGrid) {
@@ -534,10 +567,60 @@ public class MainWindowController implements LevelEditorController {
 			deltaX = (mouseX / scale - dragObject.width / 2) - dragObject.x;
 			deltaY = (mouseY / scale - dragObject.height / 2) - dragObject.y;
 		}
-		
+
 		for (int i = 0; i < selectedObjects.size(); i++) {
-			selectedObjects.get(i).x += deltaX;
 			selectedObjects.get(i).y += deltaY;
+			selectedObjects.get(i).x += deltaX;
 		}
+	}
+
+	private Pixel[][] sobel(Image img) {
+		PixelReader pr = img.getPixelReader();
+		Pixel[][] grayscale = new Pixel[(int) img.getWidth()][(int) img.getHeight()];
+		Pixel[][] result = new Pixel[(int) img.getWidth()][(int) img.getHeight()];
+		
+		for (int x = 0; x < img.getWidth(); x++) {
+			for (int y = 0; y < img.getHeight(); y++) {
+				if (pr.getColor(x, y).getOpacity() > 0.05) {
+					grayscale[x][y] = new Pixel(x, y, Color.WHITE);
+				} else {
+					grayscale[x][y] = new Pixel(x, y, Color.BLACK);
+				}
+			}
+		}
+		
+		for (int x = 1; x < result.length - 1; x++) {
+			for (int y = 1; y < result[0].length - 1; y++) {
+				Color topRight = grayscale[x + 1][y - 1].color;
+				Color middleRight = grayscale[x + 1][y].color;
+				Color bottomRight = grayscale[x + 1][y + 1].color;
+				Color topLeft = grayscale[x - 1][y - 1].color;
+				Color middleLeft = grayscale[x - 1][y].color;
+				Color bottomLeft = grayscale[x - 1][y + 1].color;
+				Color topCenter = grayscale[x][y - 1].color;
+				Color bottomCenter = grayscale[x][y + 1].color;
+
+				double val1 = topLeft.getRed() * -1;
+				val1 += middleLeft.getRed() * -2;
+				val1 += bottomLeft.getRed() * -1;
+				val1 += topRight.getRed();
+				val1 += middleRight.getRed() * 2;
+				val1 += bottomRight.getRed();
+
+				double val2 = topLeft.getRed() * -1;
+				val2 += topCenter.getRed() * -2;
+				val2 += topRight.getRed() * -1;
+				val2 += bottomLeft.getRed() * 1;
+				val2 += bottomCenter.getRed() * 2;
+				val2 += bottomRight.getRed() * 1;
+
+				double val = Math.sqrt(val1 * val1 + val2 * val2);
+				if (val > 1) {
+					val = 1;
+				}
+				result[x][y] = new Pixel(x, y, new Color(val, 0, 0, val));
+			}
+		}
+		return result;
 	}
 }
