@@ -163,9 +163,7 @@ public class MainWindowController implements LevelEditorController {
 		canvas.setOnMouseDragged(e -> {
 			mouseX = e.getX();
 			mouseY = e.getY();
-			if (!isSelecting && selectedObjects.size() > 0) { // dragging
-																// selected
-																// objects
+			if (!isSelecting && selectedObjects.size() > 0) { // dragging elected objects
 				updateSelectedPosition();
 			} else if (currentObject == null) { // dragging select rect
 				if (selectRect == null) {
@@ -209,6 +207,10 @@ public class MainWindowController implements LevelEditorController {
 					levelMap.get(currentLayer - 1).add(o);
 					selectedObjects.add(o);
 				}
+				drawGrid();
+			}
+			if (e.getCode() == KeyCode.DELETE) {
+				removeAllSelectedObjects();
 				drawGrid();
 			}
 		});
@@ -407,6 +409,13 @@ public class MainWindowController implements LevelEditorController {
 		selectedObjects.clear();
 		drawGrid();
 	}
+	
+	private void removeAllSelectedObjects() {
+		for (int i = 0; i < selectedObjects.size(); i++) {
+			levelMap.get(currentLayer - 1).remove(selectedObjects.get(i));
+		}
+		selectedObjects.clear();
+	}
 
 	private void removeObject() {
 		for (int i = levelMap.get(currentLayer - 1).size() - 1; i >= 0; i--) {
@@ -505,7 +514,7 @@ public class MainWindowController implements LevelEditorController {
 			for (int j = 1; j < pixels.length-1; j++) {
 				for (int k = 1; k < pixels[j].length-1; k++) {
 					g.setFill(pixels[j][k].color);
-					g.fillRect(t.x * scale + pixels[j][k].x, t.y * scale + pixels[j][k].y, 1, 1);
+					g.fillRect(t.x * scale + pixels[j][k].x - 5, t.y * scale + pixels[j][k].y - 5, 1, 1);
 				}
 			}
 		}
@@ -576,21 +585,29 @@ public class MainWindowController implements LevelEditorController {
 
 	private Pixel[][] sobel(Image img) {
 		PixelReader pr = img.getPixelReader();
-		Pixel[][] grayscale = new Pixel[(int) img.getWidth()][(int) img.getHeight()];
-		Pixel[][] result = new Pixel[(int) img.getWidth()][(int) img.getHeight()];
+		Pixel[][] grayscale = new Pixel[(int) img.getWidth() + 10][(int) img.getHeight() + 10];
+		Pixel[][] result = new Pixel[(int) img.getWidth() + 10][(int) img.getHeight() + 10];
 		
 		for (int x = 0; x < img.getWidth(); x++) {
 			for (int y = 0; y < img.getHeight(); y++) {
 				if (pr.getColor(x, y).getOpacity() > 0.05) {
-					grayscale[x][y] = new Pixel(x, y, Color.WHITE);
+					grayscale[x+5][y+5] = new Pixel(x, y, Color.WHITE);
 				} else {
+					grayscale[x+5][y+5] = new Pixel(x, y, Color.BLACK);
+				}
+			}
+		}
+		
+		for (int x = 0; x < grayscale.length; x++) {
+			for (int y = 0; y < grayscale[0].length; y++) {
+				if (grayscale[x][y] == null) {
 					grayscale[x][y] = new Pixel(x, y, Color.BLACK);
 				}
 			}
 		}
 		
-		for (int x = 1; x < result.length - 1; x++) {
-			for (int y = 1; y < result[0].length - 1; y++) {
+		for (int x = 1; x < grayscale.length - 1; x++) {
+			for (int y = 1; y < grayscale[0].length - 1; y++) {
 				Color topRight = grayscale[x + 1][y - 1].color;
 				Color middleRight = grayscale[x + 1][y].color;
 				Color bottomRight = grayscale[x + 1][y + 1].color;
