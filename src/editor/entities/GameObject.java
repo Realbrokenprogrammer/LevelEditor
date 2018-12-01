@@ -1,12 +1,14 @@
 package editor.entities;
 
+import java.awt.image.BufferedImage;
+
 public class GameObject {
 	public double x;
 	public double y;
 	public double width = 32;
 	public double height = 32;
 	public String imageURL = "";
-	public Pixel[][] selectedPixels;
+	public BufferedImage selectedPixels;
 	public ObjectType type = null;
 	public String objectName = "";
 	

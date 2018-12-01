@@ -1,7 +1,10 @@
 package editor.controller;
 
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -11,6 +14,7 @@ import editor.entities.GameObject;
 import editor.entities.ObjectType;
 import editor.entities.Pixel;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -74,9 +78,11 @@ public class MainWindowController implements LevelEditorController {
 	private ArrayList<GameObject> selectedObjects = null;
 	private ArrayList<GameObject> clipboard = null;
 	private boolean ctrlIsDown = false;
+	private boolean altIsDown = false;
 	private boolean snapToGrid = true;
 	private GameObject[] allObjects;
 	private double scale = 1.0;
+	private double objectScale = 1.0;
 	private double mouseX;
 	private double mouseY;
 
@@ -192,6 +198,9 @@ public class MainWindowController implements LevelEditorController {
 			if (e.getCode() == KeyCode.CONTROL) {
 				ctrlIsDown = true;
 			}
+			if (e.getCode() == KeyCode.ALT) {
+				altIsDown = true;
+			}
 			// Copy
 			if (e.getCode() == KeyCode.C && ctrlIsDown) {
 				clipboard.clear();
@@ -218,6 +227,9 @@ public class MainWindowController implements LevelEditorController {
 		canvas.getScene().setOnKeyReleased(e -> {
 			if (e.getCode() == KeyCode.CONTROL) {
 				ctrlIsDown = false;
+			}
+			if (e.getCode() == KeyCode.ALT) {
+				altIsDown = false;
 			}
 			if (e.getCode() == KeyCode.S) {
 				if (snapToGrid) {
@@ -257,6 +269,19 @@ public class MainWindowController implements LevelEditorController {
 					canvas.setWidth(levelSettings.width * TILE_SIZE * scale);
 					canvas.setHeight(levelSettings.height * TILE_SIZE * scale);
 					drawGrid();
+				} else if (altIsDown) {
+					if (currentObject != null) {
+						if (event.getDeltaY() > 0) {
+							if (objectScale < 5) {
+								objectScale += 0.2;
+							}
+						} else {
+							if (objectScale > 0.6) {
+								objectScale -= 0.2;
+							}
+						}
+						drawGrid();
+					}
 				} else {
 					double delta = event.getDeltaY() / canvas.getHeight();
 					scrollPane.setVvalue(scrollPane.getVvalue() - delta * 1.5);
@@ -438,6 +463,8 @@ public class MainWindowController implements LevelEditorController {
 			t.type = currentObject.type;
 			t.objectName = currentObject.objectName;
 			t.imageURL = "res/sprites/" + t.objectName + ".png";
+			t.width *= objectScale;
+			t.height *= objectScale;
 
 			if (snapToGrid) {
 				t.x = x * TILE_SIZE;
@@ -504,19 +531,18 @@ public class MainWindowController implements LevelEditorController {
 		// Draw selected objects
 		for (int i = 0; i < selectedObjects.size(); i++) {
 			GameObject t = selectedObjects.get(i);
-			Pixel[][] pixels = null;
+			BufferedImage img = null;
 			for (int j = 0; j < allObjects.length; j++) {
 				if (t.objectName == allObjects[j].objectName) {
-					pixels = allObjects[j].selectedPixels;
+					img = allObjects[j].selectedPixels;
 					break;
 				}
 			}
-			for (int j = 1; j < pixels.length-1; j++) {
-				for (int k = 1; k < pixels[j].length-1; k++) {
-					g.setFill(pixels[j][k].color);
-					g.fillRect(t.x * scale + pixels[j][k].x - 5, t.y * scale + pixels[j][k].y - 5, 1, 1);
-				}
-			}
+			double s = 10.0 * ((t.width * scale) / (double) (img.getWidth() - 10.0));
+			int w = (int) (t.width * scale + s);
+			int h = (int) (t.height * scale + s);
+			Image jfxImg = SwingFXUtils.toFXImage(resize(img, w, h), null);
+			g.drawImage(jfxImg, t.x * scale - s / 2, t.y * scale - s / 2);
 		}
 
 		// Draw select rectangle
@@ -529,7 +555,7 @@ public class MainWindowController implements LevelEditorController {
 		// Draw current object at cursor
 		if (currentObject != null) {
 			GameObject t = currentObject;
-			Image img = new Image("file:res/sprites/" + t.objectName + ".png", t.width * scale, t.height * scale, false,
+			Image img = new Image("file:res/sprites/" + t.objectName + ".png", t.width * scale * objectScale, t.height * scale * objectScale, false,
 					false);
 			if (snapToGrid) {
 				g.drawImage(img, x * TILE_SIZE * scale, y * TILE_SIZE * scale);
@@ -538,6 +564,17 @@ public class MainWindowController implements LevelEditorController {
 			}
 		}
 	}
+	
+	public static BufferedImage resize(BufferedImage img, int newW, int newH) { 
+	    java.awt.Image tmp = img.getScaledInstance(newW, newH, java.awt.Image.SCALE_SMOOTH);
+	    BufferedImage dimg = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_ARGB);
+
+	    Graphics2D g2d = dimg.createGraphics();
+	    g2d.drawImage(tmp, 0, 0, null);
+	    g2d.dispose();
+
+	    return dimg;
+	} 
 
 	private Rectangle getAdjustedRect() {
 		double rY = selectRect.getY();
@@ -583,7 +620,7 @@ public class MainWindowController implements LevelEditorController {
 		}
 	}
 
-	private Pixel[][] sobel(Image img) {
+	private BufferedImage sobel(Image img) {
 		PixelReader pr = img.getPixelReader();
 		Pixel[][] grayscale = new Pixel[(int) img.getWidth() + 10][(int) img.getHeight() + 10];
 		Pixel[][] result = new Pixel[(int) img.getWidth() + 10][(int) img.getHeight() + 10];
@@ -638,6 +675,25 @@ public class MainWindowController implements LevelEditorController {
 				result[x][y] = new Pixel(x, y, new Color(val, 0, 0, val));
 			}
 		}
-		return result;
+		
+		BufferedImage bfimg = new BufferedImage(result.length, result[0].length, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = (Graphics2D) bfimg.getGraphics();
+		for (int x = 0; x < result.length; x++) {
+			for (int y = 0; y < result[0].length; y++) {
+				if (result[x][y] == null) {
+					g.setColor(new java.awt.Color(0, 0, 0, 0));
+				} else {
+					int red = (int) (255.0 * result[x][y].color.getRed());
+					int green = (int) (255.0 * result[x][y].color.getGreen());
+					int blue = (int) (255.0 * result[x][y].color.getBlue());
+					int op = (int) (255.0 * result[x][y].color.getOpacity());
+					g.setColor(new java.awt.Color(red, green, blue, op));
+				}
+				g.fillRect(x, y, 1, 1);
+			}
+		}
+		g.dispose();
+		
+		return bfimg;
 	}
 }
