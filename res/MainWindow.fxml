@@ -7,9 +7,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #505050;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="editor.controller.MainWindowController">
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="editor.controller.MainWindowController">
 	<children>
-      <BorderPane style="-fx-background-color: #505050;">
+      <BorderPane>
          <top>
       		<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
       			<menus>
@@ -32,11 +32,11 @@
       		</MenuBar>
          </top>
          <center>
-          <AnchorPane fx:id="anchorPane" minHeight="0.0" minWidth="0.0" style="-fx-background-color: #505050;" BorderPane.alignment="CENTER">
+          <AnchorPane fx:id="anchorPane" minHeight="0.0" minWidth="0.0" BorderPane.alignment="CENTER">
                <children>
-                  <StackPane fx:id="stackPane" style="-fx-background-color: #505050;">
+                  <StackPane fx:id="stackPane">
                      <children>
-                        <ScrollPane fx:id="scrollPane" style="-fx-background-color: #262626;" stylesheets="@style.css">
+                        <ScrollPane fx:id="scrollPane" style="-fx-background-color: #303030;" stylesheets="@style.css">
                            <content>
                         		<Canvas fx:id="canvas" height="225.0" width="350.0" />
                            </content>

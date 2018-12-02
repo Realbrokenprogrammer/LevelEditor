@@ -351,6 +351,7 @@ public class MainWindowController implements LevelEditorController {
 		grass.type = ObjectType.TILE;
 		grass.setObjectName("grass");
 		grass.imageURL = "res/sprites/" + grass.getObjectName() + ".png";
+		grass.image = new Image("file:" + grass.imageURL);
 		grass.selectedPixels = sobel(new Image("file:" + grass.imageURL, grass.width * scale, grass.height * scale, false, false));
 		GameObject[] temp = { grass };
 		allObjects = temp;
@@ -505,6 +506,7 @@ public class MainWindowController implements LevelEditorController {
 			t.imageURL = "res/sprites/" + t.getObjectName() + ".png";
 			t.width *= objectScale;
 			t.height *= objectScale;
+			t.scale = objectScale;
 
 			if (snapToGrid) {
 				t.x = x * TILE_SIZE;
@@ -539,13 +541,12 @@ public class MainWindowController implements LevelEditorController {
 		GraphicsContext g = this.canvas.getGraphicsContext2D();
 		g.clearRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
 		g.setStroke(Color.GRAY);
-		g.setFill(new Color(0.1, 0.1, 0.1, 1));
-		g.fillRect(0, 0, this.canvas.getWidth(), this.canvas.getWidth());
+		g.scale(scale, scale);
 
 		// Draw grid
 		for (int i = 0; i < levelSettings.width; i++) {
 			for (int j = 0; j < levelSettings.height; j++) {
-				g.strokeRect(i * TILE_SIZE * scale, j * TILE_SIZE * scale, TILE_SIZE * scale, TILE_SIZE * scale);
+				g.strokeRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 			}
 		}
 
@@ -553,18 +554,23 @@ public class MainWindowController implements LevelEditorController {
 		if (layerCheckBox.isSelected()) {
 			for (int i = 0; i < levelMap.get(currentLayer - 1).size(); i++) {
 				GameObject t = levelMap.get(currentLayer - 1).get(i);
-				if (t.imageURL != "") {
-					Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
-					g.drawImage(img, t.x * scale, t.y * scale);
+				for (int j = 0; j < allObjects.length; j++) {
+					if (t.getObjectName() == allObjects[j].getObjectName()) {
+						g.scale(t.scale, t.scale);
+						g.drawImage(allObjects[j].image, t.x, t.y);
+						g.scale(1 / t.scale, 1 / t.scale);
+					}
 				}
 			}
 		} else {
+			g.setFill(Color.WHITE);
 			for (int i = 0; i < levelMap.size(); i++) {
 				for (int j = 0; j < levelMap.get(i).size(); j++) {
 					GameObject t = levelMap.get(i).get(j);
-					if (t.imageURL != "") {
-						Image img = new Image("file:" + t.imageURL, t.width * scale, t.height * scale, false, false);
-						g.drawImage(img, t.x * scale, t.y * scale);
+					for (int k = 0; k < allObjects.length; k++) {
+						g.scale(t.scale, t.scale);
+						g.drawImage(allObjects[k].image, t.x / t.scale, t.y / t.scale);
+						g.scale(1 / t.scale, 1 / t.scale);
 					}
 				}
 			}
@@ -580,31 +586,33 @@ public class MainWindowController implements LevelEditorController {
 					break;
 				}
 			}
-			double s = 10.0 * ((t.width * scale) / (double) (img.getWidth() - 10.0));
-			int w = (int) (t.width * scale + s);
-			int h = (int) (t.height * scale + s);
+			double s = 10.0 * ((t.width) / (double) (img.getWidth() - 10.0));
+			int w = (int) (t.width + s);
+			int h = (int) (t.height + s);
 			Image jfxImg = SwingFXUtils.toFXImage(resize(img, w, h), null);
-			g.drawImage(jfxImg, t.x * scale - s / 2, t.y * scale - s / 2);
+			g.drawImage(jfxImg, t.x - s / 2, t.y - s / 2);
 		}
 
 		// Draw select rectangle
 		if (selectRect != null) {
 			g.setFill(new Color(0, 0, 1, 0.2));
 			Rectangle r = getAdjustedRect();
-			g.fillRect(r.getX(), r.getY(), r.getWidth(), r.getHeight());
+			g.fillRect(r.getX() / scale, r.getY() / scale, r.getWidth() / scale, r.getHeight() / scale);
 		}
 
 		// Draw current object at cursor
 		if (currentObject != null) {
 			GameObject t = currentObject;
-			Image img = new Image("file:res/sprites/" + t.getObjectName() + ".png", t.width * scale * objectScale, t.height * scale * objectScale, false,
+			Image img = new Image("file:res/sprites/" + t.getObjectName() + ".png", t.width * objectScale, t.height * objectScale, false,
 					false);
 			if (snapToGrid) {
-				g.drawImage(img, x * TILE_SIZE * scale, y * TILE_SIZE * scale);
+				g.drawImage(img, x * TILE_SIZE, y * TILE_SIZE);
 			} else {
-				g.drawImage(img, mouseX - (t.width * scale) / 2, mouseY - (t.height * scale) / 2);
+				g.drawImage(img, mouseX - (t.width) / 2, mouseY - (t.height) / 2);
 			}
 		}
+		
+		g.scale(1 / scale, 1 / scale);
 	}
 	
 	public static BufferedImage resize(BufferedImage img, int newW, int newH) { 
