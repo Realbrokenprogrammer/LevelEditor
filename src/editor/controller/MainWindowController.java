@@ -1,7 +1,6 @@
 package editor.controller;
 
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import editor.entities.GameObject;
 import editor.entities.ObjectType;
 import editor.entities.Pixel;
+import editor.entities.Property;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
@@ -27,6 +27,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
@@ -61,9 +62,13 @@ public class MainWindowController implements LevelEditorController {
 	@FXML
 	public VBox objectPanel;
 	@FXML
+	public VBox propertyPanel;
+	@FXML
 	public StackPane stackPane;
 	@FXML
 	public ScrollPane objectScroll;
+	@FXML
+	public ScrollPane propertyScroll;
 	@FXML
 	public HBox objectBar;
 	@FXML
@@ -143,6 +148,7 @@ public class MainWindowController implements LevelEditorController {
 		stage.setHeight(height);
 
 		this.objectPanel.setMinHeight(height);
+		this.propertyPanel.setMinHeight(height);
 
 		canvas.setOnMouseMoved(e -> {
 			mouseX = e.getX();
@@ -335,15 +341,15 @@ public class MainWindowController implements LevelEditorController {
 		result.y = o.y + 10;
 		result.imageURL = o.imageURL;
 		result.type = o.type;
-		result.objectName = o.objectName;
+		result.setObjectName(o.getObjectName());
 		return result;
 	}
 
 	private void initAllObjects() {
 		GameObject grass = new GameObject();
 		grass.type = ObjectType.TILE;
-		grass.objectName = "grass";
-		grass.imageURL = "res/sprites/" + grass.objectName + ".png";
+		grass.setObjectName("grass");
+		grass.imageURL = "res/sprites/" + grass.getObjectName() + ".png";
 		grass.selectedPixels = sobel(new Image("file:" + grass.imageURL, grass.width * scale, grass.height * scale, false, false));
 		GameObject[] temp = { grass };
 		allObjects = temp;
@@ -390,14 +396,14 @@ public class MainWindowController implements LevelEditorController {
 					ImageView iv = new ImageView();
 					objectPanel.setSpacing(10);
 					objectPanel.setPadding(new Insets(0, 10, 10, 10));
-					Image img = new Image("file:res/sprites/" + allObjects[i].objectName + ".png");
+					Image img = new Image("file:res/sprites/" + allObjects[i].getObjectName() + ".png");
 					iv.setImage(img);
 					objectPanel.getChildren().add(iv);
 					iv.setOnMouseClicked(e -> {
 						GameObject t = new GameObject();
 						t.type = ObjectType.TILE;
-						t.objectName = "grass";
-						t.imageURL = "res/sprites/" + t.objectName + ".png";
+						t.setObjectName("grass");
+						t.imageURL = "res/sprites/" + t.getObjectName() + ".png";
 						currentObject = t;
 						selectedObjects.clear();
 					});
@@ -424,15 +430,48 @@ public class MainWindowController implements LevelEditorController {
 			GameObject o = levelMap.get(currentLayer - 1).get(i);
 			if (o.contains(mouseX / scale, mouseY / scale)) {
 				if (!selectedObjects.contains(o)) {
+					hideProperties();
 					selectedObjects.clear();
 					selectedObjects.add(o);
+					showProperties();
 				}
 				drawGrid();
 				return;
 			}
 		}
+		hideProperties();
 		selectedObjects.clear();
 		drawGrid();
+	}
+	
+	private void showProperties() {
+		propertyScroll.setVisible(true);
+		while (propertyPanel.getChildren().size() > 1) {
+			propertyPanel.getChildren().remove(1);
+		}
+		for (int i = 0; i < selectedObjects.get(0).properties.length; i++) {
+			Property p = selectedObjects.get(0).properties[i];
+			HBox hbox = new HBox();
+			hbox.setSpacing(5);
+			hbox.setPadding(new Insets(0, 0, 0, 5));
+			Text t = new Text(p.name + ":");
+			TextField tf = new TextField();
+			tf.setText(p.value);
+			hbox.getChildren().add(t);
+			hbox.getChildren().add(tf);
+			propertyPanel.getChildren().add(hbox);
+		}
+	}
+	
+	private void hideProperties() {
+		propertyScroll.setVisible(false);
+		if (selectedObjects.size() > 0) {
+			for (int i = 1; i < propertyPanel.getChildren().size(); i++) {
+				HBox hbox = (HBox) propertyPanel.getChildren().get(i);
+				TextField tf = (TextField) hbox.getChildren().get(1);
+				selectedObjects.get(0).properties[i - 1].value = tf.getText();
+			}	
+		}
 	}
 	
 	private void removeAllSelectedObjects() {
@@ -461,8 +500,8 @@ public class MainWindowController implements LevelEditorController {
 		if (currentObject != null) {
 			GameObject t = new GameObject();
 			t.type = currentObject.type;
-			t.objectName = currentObject.objectName;
-			t.imageURL = "res/sprites/" + t.objectName + ".png";
+			t.setObjectName(currentObject.getObjectName());
+			t.imageURL = "res/sprites/" + t.getObjectName() + ".png";
 			t.width *= objectScale;
 			t.height *= objectScale;
 
@@ -533,7 +572,7 @@ public class MainWindowController implements LevelEditorController {
 			GameObject t = selectedObjects.get(i);
 			BufferedImage img = null;
 			for (int j = 0; j < allObjects.length; j++) {
-				if (t.objectName == allObjects[j].objectName) {
+				if (t.getObjectName() == allObjects[j].getObjectName()) {
 					img = allObjects[j].selectedPixels;
 					break;
 				}
@@ -555,7 +594,7 @@ public class MainWindowController implements LevelEditorController {
 		// Draw current object at cursor
 		if (currentObject != null) {
 			GameObject t = currentObject;
-			Image img = new Image("file:res/sprites/" + t.objectName + ".png", t.width * scale * objectScale, t.height * scale * objectScale, false,
+			Image img = new Image("file:res/sprites/" + t.getObjectName() + ".png", t.width * scale * objectScale, t.height * scale * objectScale, false,
 					false);
 			if (snapToGrid) {
 				g.drawImage(img, x * TILE_SIZE * scale, y * TILE_SIZE * scale);
