@@ -149,6 +149,7 @@ public class MainWindowController implements LevelEditorController {
 
 		this.objectPanel.setMinHeight(height);
 		this.propertyPanel.setMinHeight(height);
+		
 
 		canvas.setOnMouseMoved(e -> {
 			mouseX = e.getX();
@@ -298,16 +299,16 @@ public class MainWindowController implements LevelEditorController {
 
 		ObservableList<Node> list = layerBar.getChildren();
 		Pane firstPane = (Pane) list.get(currentLayer);
-		firstPane.setStyle("-fx-background-color: #CCCCCC");
+		firstPane.setStyle("-fx-background-color: #262626");
 		for (int i = 1; i < list.size(); i++) {
 			Pane p = (Pane) list.get(i);
 			final int index = i;
 			p.setOnMouseEntered(e -> {
-				p.setStyle("-fx-background-color: #CCCCCC");
+				p.setStyle("-fx-background-color: #262626");
 			});
 			p.setOnMouseExited(e -> {
 				if (index != currentLayer) {
-					p.setStyle("-fx-background-color: #FFFFFF");
+					p.setStyle("-fx-background-color: #000000");
 				}
 			});
 			p.setOnMouseClicked(e -> {
@@ -316,9 +317,9 @@ public class MainWindowController implements LevelEditorController {
 					currentLayer = Integer.parseInt(t.getText());
 					for (int j = 1; j < list.size(); j++) {
 						Pane pane = (Pane) list.get(j);
-						pane.setStyle("-fx-background-color: #FFFFFF");
+						pane.setStyle("-fx-background-color: #000000");
 					}
-					p.setStyle("-fx-background-color: #CCCCCC");
+					p.setStyle("-fx-background-color: #262626");
 					drawGrid();
 				} else if (index == list.size() - 2) {
 					if (objectScroll.isVisible()) {
@@ -538,6 +539,8 @@ public class MainWindowController implements LevelEditorController {
 		GraphicsContext g = this.canvas.getGraphicsContext2D();
 		g.clearRect(0, 0, this.canvas.getWidth(), this.canvas.getHeight());
 		g.setStroke(Color.GRAY);
+		g.setFill(new Color(0.1, 0.1, 0.1, 1));
+		g.fillRect(0, 0, this.canvas.getWidth(), this.canvas.getWidth());
 
 		// Draw grid
 		for (int i = 0; i < levelSettings.width; i++) {

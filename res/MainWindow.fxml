@@ -7,9 +7,9 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="editor.controller.MainWindowController">
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #505050;" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="editor.controller.MainWindowController">
 	<children>
-      <BorderPane>
+      <BorderPane style="-fx-background-color: #505050;">
          <top>
       		<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
       			<menus>
@@ -32,11 +32,11 @@
       		</MenuBar>
          </top>
          <center>
-          <AnchorPane fx:id="anchorPane" minHeight="0.0" minWidth="0.0" BorderPane.alignment="CENTER">
+          <AnchorPane fx:id="anchorPane" minHeight="0.0" minWidth="0.0" style="-fx-background-color: #505050;" BorderPane.alignment="CENTER">
                <children>
-                  <StackPane fx:id="stackPane">
+                  <StackPane fx:id="stackPane" style="-fx-background-color: #505050;">
                      <children>
-                        <ScrollPane fx:id="scrollPane">
+                        <ScrollPane fx:id="scrollPane" style="-fx-background-color: #262626;" stylesheets="@style.css">
                            <content>
                         		<Canvas fx:id="canvas" height="225.0" width="350.0" />
                            </content>
@@ -92,56 +92,56 @@
             </AnchorPane>
          </center>
          <bottom>
-            <HBox fx:id="layerBar" prefHeight="30.0" BorderPane.alignment="CENTER">
+            <HBox fx:id="layerBar" prefHeight="30.0" style="-fx-background-color: #000000;" BorderPane.alignment="CENTER">
                <children>
                   <Pane prefHeight="30.0">
                      <children>
-                        <Text layoutX="6.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Layers:" wrappingWidth="40.0" />
+                        <Text fill="WHITE" layoutX="6.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Layers:" wrappingWidth="40.0" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="30.0">
                      <children>
-                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="1" wrappingWidth="13.0" />
+                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="1" wrappingWidth="13.0" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="30.0">
                      <children>
-                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="2" wrappingWidth="13.0" />
+                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="2" wrappingWidth="13.0" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="30.0">
                      <children>
-                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="3" wrappingWidth="13.0" />
+                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="3" wrappingWidth="13.0" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="30.0">
                      <children>
-                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="4" wrappingWidth="13.0" />
+                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="4" wrappingWidth="13.0" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="30.0">
                      <children>
-                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="5" wrappingWidth="13.0" />
+                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="5" wrappingWidth="13.0" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="30.0">
                      <children>
-                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="6" wrappingWidth="13.0" />
+                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="6" wrappingWidth="13.0" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="30.0">
                      <children>
-                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="7" wrappingWidth="13.0" />
+                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="7" wrappingWidth="13.0" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="30.0">
                      <children>
-                        <Text layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="8" wrappingWidth="13.0" />
+                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="8" wrappingWidth="13.0" />
                      </children>
                   </Pane>
                   <HBox alignment="CENTER">
                      <children>
-                        <CheckBox fx:id="layerCheckBox" mnemonicParsing="false" text="View only this layer" />
+                        <CheckBox fx:id="layerCheckBox" mnemonicParsing="false" text="View only this layer" textFill="WHITE" />
                      </children>
                      <padding>
                         <Insets left="5.0" right="5.0" />
@@ -149,12 +149,12 @@
                   </HBox>
                   <Pane prefHeight="30.0" prefWidth="56.0">
                      <children>
-                        <Text layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Object" wrappingWidth="41.0" />
+                        <Text fill="WHITE" layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Object" wrappingWidth="41.0" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="56.0">
                      <children>
-                        <Text layoutX="10.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select" wrappingWidth="41.0" />
+                        <Text fill="WHITE" layoutX="10.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select" wrappingWidth="41.0" />
                      </children>
                   </Pane>
                </children>
