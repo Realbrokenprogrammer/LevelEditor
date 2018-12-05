@@ -1,8 +1,7 @@
 package editor.entities;
 
-import java.awt.image.BufferedImage;
-
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 
 public class GameObject {
 	public double x;
@@ -12,7 +11,7 @@ public class GameObject {
 	public double scale = 1.0;
 	public String imageURL = "";
 	public Image image = null;
-	public BufferedImage selectedPixels;
+	public WritableImage selectedPixels;
 	public ObjectType type = null;
 	private String objectName = "";
 	public Property[] properties;

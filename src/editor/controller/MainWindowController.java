@@ -1,9 +1,7 @@
 package editor.controller;
 
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -14,7 +12,6 @@ import editor.entities.ObjectType;
 import editor.entities.Pixel;
 import editor.entities.Property;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,6 +28,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -105,6 +104,13 @@ public class MainWindowController implements LevelEditorController {
 
 		initAllObjects();
 		initObjectPanel();
+		
+		for (int i = 0; i < allObjects.length; i++) {
+			allObjects[i].selectedPixels = sobel(new Image("file:" + allObjects[i].imageURL, 
+					allObjects[i].width, 
+					allObjects[i].height, 
+					false, false));
+		}
 
 		menuFileNew.setOnAction(e -> {
 			Parent root;
@@ -266,12 +272,6 @@ public class MainWindowController implements LevelEditorController {
 							scale -= 0.2;
 						}
 					}
-					for (int i = 0; i < allObjects.length; i++) {
-						allObjects[i].selectedPixels = sobel(new Image("file:" + allObjects[i].imageURL, 
-								allObjects[i].width * scale, 
-								allObjects[i].height * scale, 
-								false, false));
-					}
 					// Resize canvas
 					canvas.setWidth(levelSettings.width * TILE_SIZE * scale);
 					canvas.setHeight(levelSettings.height * TILE_SIZE * scale);
@@ -338,6 +338,7 @@ public class MainWindowController implements LevelEditorController {
 		GameObject result = new GameObject();
 		result.height = o.height;
 		result.width = o.width;
+		result.scale = o.scale;
 		result.x = o.x + 10;
 		result.y = o.y + 10;
 		result.imageURL = o.imageURL;
@@ -353,7 +354,19 @@ public class MainWindowController implements LevelEditorController {
 		grass.imageURL = "res/sprites/" + grass.getObjectName() + ".png";
 		grass.image = new Image("file:" + grass.imageURL);
 		grass.selectedPixels = sobel(new Image("file:" + grass.imageURL, grass.width * scale, grass.height * scale, false, false));
-		GameObject[] temp = { grass };
+		grass.width = 32;
+		grass.height = 32;
+		
+		GameObject suit = new GameObject();
+		suit.type = ObjectType.ENEMY;
+		suit.setObjectName("suit");
+		suit.imageURL = "res/sprites/" + suit.getObjectName() + ".png";
+		suit.image = new Image("file:" + suit.imageURL);
+		suit.selectedPixels = sobel(suit.image);
+		suit.width = 64;
+		suit.height = 128;
+		
+		GameObject[] temp = { grass, suit };
 		allObjects = temp;
 	}
 
@@ -395,6 +408,7 @@ public class MainWindowController implements LevelEditorController {
 		if (index == 0) {
 			for (int i = 0; i < this.allObjects.length; i++) {
 				if (allObjects[i].type == ObjectType.TILE) {
+					final int objIndex = i;
 					ImageView iv = new ImageView();
 					objectPanel.setSpacing(10);
 					objectPanel.setPadding(new Insets(0, 10, 10, 10));
@@ -404,15 +418,37 @@ public class MainWindowController implements LevelEditorController {
 					iv.setOnMouseClicked(e -> {
 						GameObject t = new GameObject();
 						t.type = ObjectType.TILE;
-						t.setObjectName("grass");
+						t.setObjectName(allObjects[objIndex].getObjectName());
 						t.imageURL = "res/sprites/" + t.getObjectName() + ".png";
+						t.width = allObjects[objIndex].width;
+						t.height = allObjects[objIndex].height;
 						currentObject = t;
 						selectedObjects.clear();
 					});
 				}
 			}
 		} else if (index == 1) {
-
+			for (int i = 0; i < this.allObjects.length; i++) {
+				if (allObjects[i].type == ObjectType.ENEMY) {
+					final int objIndex = i;
+					ImageView iv = new ImageView();
+					objectPanel.setSpacing(10);
+					objectPanel.setPadding(new Insets(0, 10, 10, 10));
+					Image img = new Image("file:res/sprites/" + allObjects[i].getObjectName() + ".png");
+					iv.setImage(img);
+					objectPanel.getChildren().add(iv);
+					iv.setOnMouseClicked(e -> {
+						GameObject t = new GameObject();
+						t.type = ObjectType.TILE;
+						t.setObjectName(allObjects[objIndex].getObjectName());
+						t.imageURL = "res/sprites/" + t.getObjectName() + ".png";
+						t.width = allObjects[objIndex].width;
+						t.height = allObjects[objIndex].height;
+						currentObject = t;
+						selectedObjects.clear();
+					});
+				}
+			}
 		}
 	}
 
@@ -563,14 +599,15 @@ public class MainWindowController implements LevelEditorController {
 				}
 			}
 		} else {
-			g.setFill(Color.WHITE);
 			for (int i = 0; i < levelMap.size(); i++) {
 				for (int j = 0; j < levelMap.get(i).size(); j++) {
 					GameObject t = levelMap.get(i).get(j);
 					for (int k = 0; k < allObjects.length; k++) {
-						g.scale(t.scale, t.scale);
-						g.drawImage(allObjects[k].image, t.x / t.scale, t.y / t.scale);
-						g.scale(1 / t.scale, 1 / t.scale);
+						if (t.getObjectName() == allObjects[k].getObjectName()) {
+							g.scale(t.scale, t.scale);
+							g.drawImage(allObjects[k].image, t.x / t.scale, t.y / t.scale);
+							g.scale(1 / t.scale, 1 / t.scale);	
+						}
 					}
 				}
 			}
@@ -579,7 +616,7 @@ public class MainWindowController implements LevelEditorController {
 		// Draw selected objects
 		for (int i = 0; i < selectedObjects.size(); i++) {
 			GameObject t = selectedObjects.get(i);
-			BufferedImage img = null;
+			WritableImage img = null;
 			for (int j = 0; j < allObjects.length; j++) {
 				if (t.getObjectName() == allObjects[j].getObjectName()) {
 					img = allObjects[j].selectedPixels;
@@ -587,10 +624,9 @@ public class MainWindowController implements LevelEditorController {
 				}
 			}
 			double s = 10.0 * ((t.width) / (double) (img.getWidth() - 10.0));
-			int w = (int) (t.width + s);
-			int h = (int) (t.height + s);
-			Image jfxImg = SwingFXUtils.toFXImage(resize(img, w, h), null);
-			g.drawImage(jfxImg, t.x - s / 2, t.y - s / 2);
+			g.scale(t.scale, t.scale);
+			g.drawImage(img, (t.x - s / 2) / t.scale, (t.y - s / 2) / t.scale);
+			g.scale(1 / t.scale, 1 / t.scale);
 		}
 
 		// Draw select rectangle
@@ -603,8 +639,7 @@ public class MainWindowController implements LevelEditorController {
 		// Draw current object at cursor
 		if (currentObject != null) {
 			GameObject t = currentObject;
-			Image img = new Image("file:res/sprites/" + t.getObjectName() + ".png", t.width * objectScale, t.height * objectScale, false,
-					false);
+			Image img = new Image("file:" + t.imageURL, t.width * objectScale, t.height * objectScale, false, false);
 			if (snapToGrid) {
 				g.drawImage(img, x * TILE_SIZE, y * TILE_SIZE);
 			} else {
@@ -613,17 +648,6 @@ public class MainWindowController implements LevelEditorController {
 		}
 		
 		g.scale(1 / scale, 1 / scale);
-	}
-	
-	public static BufferedImage resize(BufferedImage img, int newW, int newH) { 
-	    java.awt.Image tmp = img.getScaledInstance(newW, newH, java.awt.Image.SCALE_SMOOTH);
-	    BufferedImage dimg = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_ARGB);
-
-	    Graphics2D g2d = dimg.createGraphics();
-	    g2d.drawImage(tmp, 0, 0, null);
-	    g2d.dispose();
-
-	    return dimg;
 	} 
 
 	private Rectangle getAdjustedRect() {
@@ -670,7 +694,7 @@ public class MainWindowController implements LevelEditorController {
 		}
 	}
 
-	private BufferedImage sobel(Image img) {
+	private WritableImage sobel(Image img) {
 		PixelReader pr = img.getPixelReader();
 		Pixel[][] grayscale = new Pixel[(int) img.getWidth() + 10][(int) img.getHeight() + 10];
 		Pixel[][] result = new Pixel[(int) img.getWidth() + 10][(int) img.getHeight() + 10];
@@ -726,23 +750,23 @@ public class MainWindowController implements LevelEditorController {
 			}
 		}
 		
-		BufferedImage bfimg = new BufferedImage(result.length, result[0].length, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = (Graphics2D) bfimg.getGraphics();
+		WritableImage bfimg = new WritableImage(result.length, result[0].length);
+		PixelWriter g = bfimg.getPixelWriter();
 		for (int x = 0; x < result.length; x++) {
 			for (int y = 0; y < result[0].length; y++) {
+				Color c = null;
 				if (result[x][y] == null) {
-					g.setColor(new java.awt.Color(0, 0, 0, 0));
+					c = new Color(0, 0, 0, 0);
 				} else {
-					int red = (int) (255.0 * result[x][y].color.getRed());
-					int green = (int) (255.0 * result[x][y].color.getGreen());
-					int blue = (int) (255.0 * result[x][y].color.getBlue());
-					int op = (int) (255.0 * result[x][y].color.getOpacity());
-					g.setColor(new java.awt.Color(red, green, blue, op));
+					double red = result[x][y].color.getRed();
+					double green = result[x][y].color.getGreen();
+					double blue = result[x][y].color.getBlue();
+					double op = result[x][y].color.getOpacity();
+					c = new Color(red, green, blue, op);
 				}
-				g.fillRect(x, y, 1, 1);
+				g.setColor(x, y, c);
 			}
 		}
-		g.dispose();
 		
 		return bfimg;
 	}
