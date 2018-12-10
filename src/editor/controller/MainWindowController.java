@@ -308,7 +308,7 @@ public class MainWindowController implements LevelEditorController {
 			});
 			p.setOnMouseExited(e -> {
 				if (index != currentLayer) {
-					p.setStyle("-fx-background-color: #000000");
+					p.setStyle("-fx-background-color: #101010");
 				}
 			});
 			p.setOnMouseClicked(e -> {
@@ -317,7 +317,7 @@ public class MainWindowController implements LevelEditorController {
 					currentLayer = Integer.parseInt(t.getText());
 					for (int j = 1; j < list.size(); j++) {
 						Pane pane = (Pane) list.get(j);
-						pane.setStyle("-fx-background-color: #000000");
+						pane.setStyle("-fx-background-color: #101010");
 					}
 					p.setStyle("-fx-background-color: #262626");
 					drawGrid();
@@ -509,6 +509,9 @@ public class MainWindowController implements LevelEditorController {
 				TextField tf = (TextField) hbox.getChildren().get(1);
 				selectedObjects.get(0).properties[i - 1].value = tf.getText();
 			}	
+		}
+		while (propertyPanel.getChildren().size() > 1) {
+			propertyPanel.getChildren().remove(1);
 		}
 	}
 	
