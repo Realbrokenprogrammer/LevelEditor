@@ -29,6 +29,9 @@ public class GameObject {
 			Property[] p = {new Property("friction", "normal"),
 					new Property("length", "short")};
 			properties = p;
+		} else if (objectName == "suit") {
+			Property[] p = {new Property("color", "black")};
+			properties = p;
 		}
 	}
 	

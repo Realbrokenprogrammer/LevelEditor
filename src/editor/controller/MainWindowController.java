@@ -540,8 +540,8 @@ public class MainWindowController implements LevelEditorController {
 			t.type = currentObject.type;
 			t.setObjectName(currentObject.getObjectName());
 			t.imageURL = "res/sprites/" + t.getObjectName() + ".png";
-			t.width *= objectScale;
-			t.height *= objectScale;
+			t.width = currentObject.width * objectScale;
+			t.height = currentObject.height * objectScale;
 			t.scale = objectScale;
 
 			if (snapToGrid) {
