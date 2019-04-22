@@ -68,10 +68,10 @@ public class LevelPane extends Canvas {
 	private boolean isCtrlDown = false;
 	private boolean isSDown = false;
 	private boolean snapToGrid = true;
+	private boolean showOnlyCurrentLayer = false;
 	
 	/*
 	 * TODO:
-	 * - Only view selected layer (implement layers)
 	 * - Improve zooming (center the zoom)
 	 * - Place objects continuously (by holding down mouse btn + some hotkey)
 	 * - Handle overlapping objects some way
@@ -80,10 +80,6 @@ public class LevelPane extends Canvas {
 	 * - Export level file
 	 */
 
-	/**
-	 * Constructor initializes all members of the LevelPane and adds listeners
-	 * for the scrollbars in the scrollpane.
-	 */
 	public LevelPane(MainWindowController mainController) {
 		this.mainController = mainController;
 		clipboard = new ArrayList<GameObject>();
@@ -122,6 +118,9 @@ public class LevelPane extends Canvas {
 		
 		// Draw all placed objects.
 		for (int i = 0; i < levelMap.size(); i++) {
+			if (showOnlyCurrentLayer) {
+				i = currentLayer - 1;
+			}
 			for (int j = 0; j < levelMap.get(i).size(); j++) {
 				GameObject t = levelMap.get(i).get(j);
 				for (int k = 0; k < allObjects.length; k++) {
@@ -131,6 +130,9 @@ public class LevelPane extends Canvas {
 						g.scale(1 / t.scale, 1 / t.scale);
 					}
 				}
+			}
+			if (showOnlyCurrentLayer) {
+				break;
 			}
 		}
 		
@@ -567,12 +569,6 @@ public class LevelPane extends Canvas {
 		return t;
 	}
 
-	/**
-	 * Calculates all the points for the grid.
-	 * 
-	 * @param width
-	 * @param height
-	 */
 	private void setGrid(int width, int height) {
 		grid = new ArrayList<Point>();
 		for (int i = 0; i < width / TILE_SIZE; i++) {
@@ -581,12 +577,16 @@ public class LevelPane extends Canvas {
 			}
 		}
 	}
+	
+	public void setShowOnlyCurrentLayer(boolean showOnlyCurrentLayer) {
+		this.showOnlyCurrentLayer = showOnlyCurrentLayer;
+	}
+	
+	public void setCurrentLayer(int currentLayer) {
+		this.currentLayer = currentLayer;
+	}
 
 	public void setCurrentObject(GameObject currentObject) {
 		this.currentObject = currentObject;
-	}
-
-	public GameObject getCurrentObject() {
-		return this.currentObject;
 	}
 }

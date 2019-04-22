@@ -143,7 +143,8 @@ public class MainWindowController implements LevelEditorController {
 		this.propertyPanel.setMinHeight(height);
 
 		layerCheckBox.setOnAction(e -> {
-			// drawGrid();
+			levelPane.setShowOnlyCurrentLayer(layerCheckBox.isSelected());
+			levelPane.draw();
 		});
 
 		ObservableList<Node> list = layerBar.getChildren();
@@ -179,6 +180,8 @@ public class MainWindowController implements LevelEditorController {
 					currentObject = null;
 					levelPane.setCurrentObject(null);
 				}
+				levelPane.setCurrentLayer(currentLayer);
+				levelPane.draw();
 			});
 		}
 	}
@@ -259,7 +262,7 @@ public class MainWindowController implements LevelEditorController {
 				ImageView iv = new ImageView();
 				objectPanel.setSpacing(10);
 				objectPanel.setPadding(new Insets(0, 10, 10, 10));
-				Image img = new Image("file:res/sprites/" + allObjects[i].getObjectName() + ".png");
+				Image img = new Image("file:res/sprites/" + allObjects[i].getObjectName() + ".png", 32, 32, false, false);
 				iv.setImage(img);
 				objectPanel.getChildren().add(iv);
 				iv.setOnMouseClicked(e -> {

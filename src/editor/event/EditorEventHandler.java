@@ -25,7 +25,7 @@ public class EditorEventHandler {
 	}
 	
 	/**
-	 * Undoes the most recent event recorded.
+	 * Undoes the previous event.
 	 * 
 	 * @param levelMap
 	 */
