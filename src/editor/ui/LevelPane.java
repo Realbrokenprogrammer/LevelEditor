@@ -5,7 +5,9 @@ import java.util.ArrayList;
 
 import editor.controller.MainWindowController;
 import editor.entities.GameObject;
+import editor.entities.Pair;
 import editor.entities.Property;
+import editor.event.EditorEventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -34,11 +36,13 @@ import javafx.stage.Stage;
 public class LevelPane extends Canvas {
 	
 	private MainWindowController mainController;
+	private EditorEventHandler eventHandler;
 
 	private GraphicsContext g;
 	private ArrayList<Point> grid;
 	private ArrayList<ArrayList<GameObject>> levelMap;
 	private ArrayList<GameObject> selectedObjects;
+	private ArrayList<Pair<GameObject, Point>> movingObjects; 
 	private ArrayList<GameObject> clipboard;
 	private Rectangle selectRectangle;
 	private GameObject[] allObjects;
@@ -68,7 +72,6 @@ public class LevelPane extends Canvas {
 	/*
 	 * TODO:
 	 * - Only view selected layer (implement layers)
-	 * - Undo + Redo
 	 * - Improve zooming (center the zoom)
 	 * - Place objects continuously (by holding down mouse btn + some hotkey)
 	 * - Handle overlapping objects some way
@@ -86,6 +89,7 @@ public class LevelPane extends Canvas {
 		clipboard = new ArrayList<GameObject>();
 		selectedObjects = new ArrayList<GameObject>();
 		levelMap = new ArrayList<ArrayList<GameObject>>();
+		eventHandler = new EditorEventHandler();
 		for (int i = 0; i < 8; i++) {
 			levelMap.add(new ArrayList<GameObject>());
 		}
@@ -247,6 +251,9 @@ public class LevelPane extends Canvas {
 					}
 				} else if (e.getButton() == MouseButton.PRIMARY) {
 					if (isOverSelected()) {
+						if (movingIndex == -1) {
+							initMovingEvent();
+						}
 						movingIndex = getDragObjectIndex();
 						moveSelectedObjects(e.getX(), e.getY());
 					} else if (movingIndex != -1) {
@@ -279,11 +286,17 @@ public class LevelPane extends Canvas {
 					snapToGrid = false;
 				}
 			}
-			if (e.getCode() == KeyCode.C) {
+			if (e.getCode() == KeyCode.C && isCtrlDown) {
 				copyToClipboard();
 			}
-			if (e.getCode() == KeyCode.V) {
+			if (e.getCode() == KeyCode.V && isCtrlDown) {
 				pasteClipboard();
+			}
+			if (e.getCode() == KeyCode.Z && isCtrlDown) {
+				eventHandler.undo(levelMap);
+			}
+			if (e.getCode() == KeyCode.Y && isCtrlDown) {
+				eventHandler.redo(levelMap);
 			}
 		});
 
@@ -353,6 +366,9 @@ public class LevelPane extends Canvas {
 			if (e.getButton() == MouseButton.SECONDARY && !isDragging) {
 				selectObject();
 			}
+			if (movingIndex != -1) {
+				addMovingEvent();
+			}
 			movingIndex = -1;
 			isMouseDown = false;
 			isDragging = false;
@@ -362,6 +378,26 @@ public class LevelPane extends Canvas {
 		});
 
 		draw();
+	}
+	
+	private void initMovingEvent() {
+		movingObjects = new ArrayList<Pair<GameObject, Point>>();
+		for (int i = 0; i < selectedObjects.size(); i++) {
+			Point p = new Point();
+			p.setLocation(selectedObjects.get(i).x, selectedObjects.get(i).y);
+			movingObjects.add(new Pair<GameObject, Point>(selectedObjects.get(i), p));
+		}
+	}
+	
+	private void addMovingEvent() {
+		ArrayList<Pair<GameObject, Pair<Point, Point>>> moving = new ArrayList<Pair<GameObject, Pair<Point, Point>>>();
+		for (int i = 0; i < selectedObjects.size(); i++) {
+			Point nwPoint = new Point();
+			nwPoint.setLocation(selectedObjects.get(i).x, selectedObjects.get(i).y);
+			Pair<Point, Point> points = new Pair<Point, Point>(movingObjects.get(i).two, nwPoint);
+			moving.add(new Pair<GameObject, Pair<Point, Point>>(selectedObjects.get(i), points));
+		}
+		eventHandler.addMoveEvent(moving);
 	}
 	
 	private void copyToClipboard() {
@@ -374,6 +410,7 @@ public class LevelPane extends Canvas {
 	}
 	
 	private void pasteClipboard() {
+		ArrayList<Pair<GameObject, Integer>> placed = new ArrayList<Pair<GameObject, Integer>>();
 		for (int i = 0; i < clipboard.size(); i++) {
 			GameObject t = new GameObject();
 			t.type = clipboard.get(i).type;
@@ -386,18 +423,23 @@ public class LevelPane extends Canvas {
 			t.y = clipboard.get(i).y + 20;
 			t.properties = clipboard.get(i).properties;
 			levelMap.get(currentLayer - 1).add(t);
+			placed.add(new Pair<GameObject, Integer>(t, currentLayer - 1));
 		}
+		eventHandler.addPlaceEvent(placed);
 	}
 	
 	private void deleteSelected() {
+		ArrayList<Pair<GameObject, Integer>> deleted = new ArrayList<Pair<GameObject, Integer>>();
 		for (int i = 0; i < selectedObjects.size(); i++) {
 			for (int j = 0; j < levelMap.size(); j++) {
 				if (levelMap.get(j).contains(selectedObjects.get(i))) {
+					deleted.add(new Pair<GameObject, Integer>(selectedObjects.get(i), j));
 					levelMap.get(j).remove(selectedObjects.get(i));
 					break;
 				}
 			}
 		}
+		eventHandler.addDeleteEvent(deleted);
 		selectedObjects.clear();
 	}
 	
@@ -410,7 +452,7 @@ public class LevelPane extends Canvas {
 			snapX = p.x - selectedObjects.get(movingIndex).x;
 			snapY = p.y - selectedObjects.get(movingIndex).y;
 		}
-		
+
 		for (int i = 0; i < selectedObjects.size(); i++) {
 			double nwX = selectedObjects.get(i).x - (prevX - x / scale);
 			double nwY = selectedObjects.get(i).y - (prevY - y / scale);
@@ -508,6 +550,9 @@ public class LevelPane extends Canvas {
 			o.y = y - o.height / 2 - viewportY;
 		}
 		levelMap.get(currentLayer - 1).add(o);
+		ArrayList<Pair<GameObject, Integer>> placed = new ArrayList<Pair<GameObject, Integer>>();
+		placed.add(new Pair<GameObject, Integer>(o, currentLayer - 1));
+		eventHandler.addPlaceEvent(placed);
 		draw();
 	}
 
