@@ -1,4 +1,4 @@
-# Tutuorial
+# Tutorial
 Most of the functionality of this level editor is accessed through hotkeys and other types of user input that might
 not be very intuitive at first. This tutorial will therefore go through the necessary user input for all available functionality.
 
