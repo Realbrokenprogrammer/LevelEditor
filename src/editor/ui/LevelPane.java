@@ -555,6 +555,7 @@ public class LevelPane extends Canvas {
 	}
 	
 	private void placeContinuously() {
+		if (currentObject != null && !isOverObject() && snapToGrid) {
 			placeObject();
 		}
 	}
