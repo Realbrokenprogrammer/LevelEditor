@@ -10,22 +10,17 @@ import java.util.ArrayList;
 import editor.entities.GameObject;
 import editor.entities.ObjectType;
 import editor.entities.Pixel;
-import editor.entities.Property;
 import editor.ui.LevelPane;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
@@ -37,13 +32,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.ScrollEvent;
 
 public class MainWindowController implements LevelEditorController {
 
@@ -74,12 +65,9 @@ public class MainWindowController implements LevelEditorController {
 	
 	private LevelPane levelPane;
 
-	private LevelSettings levelSettings;
 	private int currentLayer = 4;
 	private int currentObjectType = 0;
-	private GameObject currentObject = null;
 	private GameObject[] allObjects;
-	private double scale = 1.0;
 
 	private final int TILE_SIZE = 32;
 
@@ -92,13 +80,6 @@ public class MainWindowController implements LevelEditorController {
 
 		initAllObjects();
 		initObjectPanel();
-		
-		for (int i = 0; i < allObjects.length; i++) {
-			allObjects[i].selectedPixels = sobel(new Image("file:" + allObjects[i].imageURL, 
-					allObjects[i].width, 
-					allObjects[i].height, 
-					false, false));
-		}
 
 		menuFileNew.setOnAction(e -> {
 			Parent root;
@@ -132,7 +113,6 @@ public class MainWindowController implements LevelEditorController {
 	}
 
 	public void setNewLevel(LevelSettings levelSettings) {
-		this.levelSettings = levelSettings;
 		Stage stage = (Stage) this.root.getScene().getWindow();
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		double width = screenSize.getWidth() * 0.7;
@@ -184,7 +164,6 @@ public class MainWindowController implements LevelEditorController {
 						objectScroll.setVisible(true);
 					}
 				} else if (index == list.size() - 1) {
-					currentObject = null;
 					levelPane.setCurrentObject(null);
 				}
 				levelPane.setCurrentLayer(currentLayer);
@@ -199,7 +178,8 @@ public class MainWindowController implements LevelEditorController {
 		grass.setObjectName("grass");
 		grass.imageURL = "res/sprites/" + grass.getObjectName() + ".png";
 		grass.image = new Image("file:" + grass.imageURL);
-		grass.selectedPixels = sobel(new Image("file:" + grass.imageURL, grass.width * scale, grass.height * scale, false, false));
+		grass.selectedPixels = sobel(grass.image, Color.RED);
+		grass.highlightPixels = sobel(grass.image, Color.BLUE);
 		grass.width = 32;
 		grass.height = 32;
 		
@@ -208,7 +188,8 @@ public class MainWindowController implements LevelEditorController {
 		suit.setObjectName("suit");
 		suit.imageURL = "res/sprites/" + suit.getObjectName() + ".png";
 		suit.image = new Image("file:" + suit.imageURL);
-		suit.selectedPixels = sobel(suit.image);
+		suit.selectedPixels = sobel(suit.image, Color.RED);
+		suit.highlightPixels = sobel(suit.image, Color.BLUE);
 		suit.width = 64;
 		suit.height = 128;
 		
@@ -279,14 +260,13 @@ public class MainWindowController implements LevelEditorController {
 					t.imageURL = "res/sprites/" + t.getObjectName() + ".png";
 					t.width = allObjects[objIndex].width;
 					t.height = allObjects[objIndex].height;
-					currentObject = t;
 					levelPane.setCurrentObject(t);
 				});
 			}
 		}
 	}
 
-	private WritableImage sobel(Image img) {
+	private WritableImage sobel(Image img, Color color) {
 		PixelReader pr = img.getPixelReader();
 		Pixel[][] grayscale = new Pixel[(int) img.getWidth() + 10][(int) img.getHeight() + 10];
 		Pixel[][] result = new Pixel[(int) img.getWidth() + 10][(int) img.getHeight() + 10];
@@ -338,7 +318,7 @@ public class MainWindowController implements LevelEditorController {
 				if (val > 1) {
 					val = 1;
 				}
-				result[x][y] = new Pixel(x, y, new Color(val, 0, 0, val));
+				result[x][y] = new Pixel(x, y, new Color(color.getRed(), color.getGreen(), color.getBlue(), val));
 			}
 		}
 		

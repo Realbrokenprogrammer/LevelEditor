@@ -13,8 +13,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -51,6 +49,8 @@ public class LevelPane extends Canvas {
 	private GameObject currentObject;
 	private int currentLayer = 4;
 	private double scale = 1.0;
+	private double width = 0;
+	private double height = 0;
 	private double objectScale = 1.0;
 	private final int TILE_SIZE = 32;
 
@@ -142,7 +142,7 @@ public class LevelPane extends Canvas {
 					for (int k = 0; k < levelMap.get(i).size(); k++) {
 						GameObject o = levelMap.get(i).get(k);
 						if (k != j && levelMap.get(i).get(j).overlaps(o)) {
-							drawOutline(o, Color.BLUE);
+							drawHighlight(o);
 						}
 					}
 				}
@@ -152,7 +152,7 @@ public class LevelPane extends Canvas {
 		// Draw selected objects.
 		for (int i = 0; i < selectedObjects.size(); i++) {
 			GameObject t = selectedObjects.get(i);
-			drawOutline(t, Color.RED);
+			drawSelected(t);
 		}
 
 		// Draw current object at cursor.
@@ -171,8 +171,23 @@ public class LevelPane extends Canvas {
 
 		g.scale(1 / scale, 1 / scale);
 	}
+	
+	private void drawHighlight(GameObject o) {
+		WritableImage img = null;
+		for (int i = 0; i < allObjects.length; i++) {
+			if (o.getObjectName() == allObjects[i].getObjectName()) {
+				img = allObjects[i].highlightPixels;
+				break;
+			}
+		}
 
-	private void drawOutline(GameObject o, Color c) {
+		double s = 10.0 * ((o.width) / (double) (img.getWidth() - 10.0));
+		g.scale(o.scale, o.scale);
+		g.drawImage(img, ((o.x - s / 2) + viewportX) / o.scale, ((o.y - s / 2) + viewportY) / o.scale);
+		g.scale(1 / o.scale, 1 / o.scale);
+	}
+
+	private void drawSelected(GameObject o) {
 		WritableImage img = null;
 		for (int i = 0; i < allObjects.length; i++) {
 			if (o.getObjectName() == allObjects[i].getObjectName()) {
@@ -180,22 +195,10 @@ public class LevelPane extends Canvas {
 				break;
 			}
 		}
-		
-		WritableImage nwImg = new WritableImage((int) img.getWidth(), (int) img.getHeight());
-		PixelWriter pw = nwImg.getPixelWriter();
-		PixelReader pr = img.getPixelReader();
-		for (int x = 0; x < img.getWidth(); x++) {
-			for (int y = 0; y < img.getHeight(); y++) {
-				if (pr.getColor(x, y).getOpacity() != 0) {
-					Color color = new Color(c.getRed(), c.getGreen(), c.getBlue(), 1.0);
-					pw.setColor(x, y, color);
-				}
-			}
-		}
 
 		double s = 10.0 * ((o.width) / (double) (img.getWidth() - 10.0));
 		g.scale(o.scale, o.scale);
-		g.drawImage(nwImg, ((o.x - s / 2) + viewportX) / o.scale, ((o.y - s / 2) + viewportY) / o.scale);
+		g.drawImage(img, ((o.x - s / 2) + viewportX) / o.scale, ((o.y - s / 2) + viewportY) / o.scale);
 		g.scale(1 / o.scale, 1 / o.scale);
 	}
 
@@ -249,6 +252,8 @@ public class LevelPane extends Canvas {
 	 * @param height
 	 */
 	public void setMapSize(int width, int height) {
+		this.width = width;
+		this.height = height;
 		setGrid(width, height);
 
 		Stage stage = (Stage) this.getScene().getWindow();
@@ -585,9 +590,18 @@ public class LevelPane extends Canvas {
 			mainController.propertyPanel.getChildren().remove(1);
 		}
 	}
+	
+	private boolean isMouseOutsideGrid() {
+		double x = mouseX / scale - viewportX;
+		double y = mouseY / scale - viewportY;
+		if (x >= 0 && x <= width && y >= 0 && y <= height) {
+			return false;
+		}
+		return true;
+	}
 
 	private void placeContinuously() {
-		if (currentObject != null && !isOverObject() && snapToGrid) {
+		if (currentObject != null && !isOverObject() && !isMouseOutsideGrid() && snapToGrid) {
 			placeObject();
 		}
 	}
