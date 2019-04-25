@@ -69,6 +69,8 @@ public class MainWindowController implements LevelEditorController {
 	public HBox objectBar;
 	@FXML
 	public CheckBox layerCheckBox;
+	@FXML
+	public CheckBox overlapCheckBox;
 	
 	private LevelPane levelPane;
 
@@ -144,6 +146,11 @@ public class MainWindowController implements LevelEditorController {
 
 		layerCheckBox.setOnAction(e -> {
 			levelPane.setShowOnlyCurrentLayer(layerCheckBox.isSelected());
+			levelPane.draw();
+		});
+		
+		overlapCheckBox.setOnAction(e -> {
+			levelPane.setHighlightOverlaps(overlapCheckBox.isSelected());
 			levelPane.draw();
 		});
 

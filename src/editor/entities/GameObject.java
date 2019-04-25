@@ -2,6 +2,7 @@ package editor.entities;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
+import javafx.scene.shape.Rectangle;
 
 public class GameObject {
 	public double x;
@@ -21,6 +22,11 @@ public class GameObject {
 			return true;
 		}
 		return false;
+	}
+	
+	public boolean overlaps(GameObject o) {
+		Rectangle r1 = new Rectangle(x, y, width, height);
+		return r1.intersects(o.x + 1, o.y + 1, o.width - 2, o.height - 2);
 	}
 	
 	public void setObjectName(String objectName) {

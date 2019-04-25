@@ -130,6 +130,14 @@
                         <Insets left="5.0" right="5.0" />
                      </padding>
                   </HBox>
+                  <HBox alignment="CENTER">
+                     <children>
+                        <CheckBox fx:id="overlapCheckBox" mnemonicParsing="false" text="Highlight overlaps" textFill="WHITE" />
+                     </children>
+                     <padding>
+                        <Insets left="5.0" right="5.0" />
+                     </padding>
+                  </HBox>
                   <Pane prefHeight="30.0" prefWidth="56.0">
                      <children>
                         <Text fill="WHITE" layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Object" wrappingWidth="41.0" />
