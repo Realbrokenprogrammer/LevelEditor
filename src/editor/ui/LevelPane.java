@@ -72,7 +72,6 @@ public class LevelPane extends Canvas {
 	
 	/*
 	 * TODO:
-	 * - Place objects continuously (by holding down mouse btn + some hotkey)
 	 * - Handle overlapping objects some way
 	 * - Load all assets from file
 	 * - Export level file
@@ -250,18 +249,22 @@ public class LevelPane extends Canvas {
 						selectRectangle.setHeight(e.getY() / scale - selectRectangle.getY());
 					}
 				} else if (e.getButton() == MouseButton.PRIMARY) {
-					if (isOverSelected()) {
-						if (movingIndex == -1) {
-							initMovingEvent();
-						}
-						movingIndex = getDragObjectIndex();
-						moveSelectedObjects(e.getX(), e.getY());
-					} else if (movingIndex != -1) {
-						moveSelectedObjects(e.getX(), e.getY());
+					if (isCtrlDown) {
+						placeContinuously();
 					} else {
-						viewportX -= prevX - e.getX() / scale;
-						viewportY -= prevY - e.getY() / scale;
-					}
+						if (isOverSelected()) {
+							if (movingIndex == -1) {
+								initMovingEvent();
+							}
+							movingIndex = getDragObjectIndex();
+							moveSelectedObjects(e.getX(), e.getY());
+						} else if (movingIndex != -1) {
+							moveSelectedObjects(e.getX(), e.getY());
+						} else {
+							viewportX -= prevX - e.getX() / scale;
+							viewportY -= prevY - e.getY() / scale;
+						}
+					}	
 				}
 			}
 			mouseX = e.getX();
@@ -479,6 +482,16 @@ public class LevelPane extends Canvas {
 		return false;
 	}
 	
+	private boolean isOverObject() {
+		for (int i = 0; i < levelMap.get(currentLayer - 1).size(); i++) {
+			GameObject o = levelMap.get(currentLayer - 1).get(i);
+			if (o.contains(mouseX / scale - viewportX, mouseY / scale - viewportY)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private int getDragObjectIndex() {
 		for (int i = 0; i < selectedObjects.size(); i++) {
 			GameObject o = selectedObjects.get(i);
@@ -538,6 +551,11 @@ public class LevelPane extends Canvas {
 		}
 		while (mainController.propertyPanel.getChildren().size() > 1) {
 			mainController.propertyPanel.getChildren().remove(1);
+		}
+	}
+	
+	private void placeContinuously() {
+			placeObject();
 		}
 	}
 
