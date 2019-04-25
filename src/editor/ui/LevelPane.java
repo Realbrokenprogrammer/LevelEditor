@@ -72,10 +72,8 @@ public class LevelPane extends Canvas {
 	
 	/*
 	 * TODO:
-	 * - Improve zooming (center the zoom)
 	 * - Place objects continuously (by holding down mouse btn + some hotkey)
 	 * - Handle overlapping objects some way
-	 * - Improve placement of pasted objects + select them when pasted
 	 * - Load all assets from file
 	 * - Export level file
 	 */
@@ -412,6 +410,9 @@ public class LevelPane extends Canvas {
 	}
 	
 	private void pasteClipboard() {
+		double deltaX = clipboard.get(0).x - (mouseX / scale - viewportX);
+		double deltaY = clipboard.get(0).y - (mouseY / scale - viewportY);
+		selectedObjects.clear();
 		ArrayList<Pair<GameObject, Integer>> placed = new ArrayList<Pair<GameObject, Integer>>();
 		for (int i = 0; i < clipboard.size(); i++) {
 			GameObject t = new GameObject();
@@ -421,9 +422,10 @@ public class LevelPane extends Canvas {
 			t.width = clipboard.get(i).width;
 			t.height = clipboard.get(i).height;
 			t.scale = clipboard.get(i).scale;
-			t.x = clipboard.get(i).x + 20;
-			t.y = clipboard.get(i).y + 20;
+			t.x = clipboard.get(i).x - deltaX;
+			t.y = clipboard.get(i).y - deltaY;
 			t.properties = clipboard.get(i).properties;
+			selectedObjects.add(t);
 			levelMap.get(currentLayer - 1).add(t);
 			placed.add(new Pair<GameObject, Integer>(t, currentLayer - 1));
 		}
