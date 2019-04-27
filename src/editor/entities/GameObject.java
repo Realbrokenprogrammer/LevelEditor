@@ -49,6 +49,8 @@ public class GameObject {
 		} else if (objectName == "suit") {
 			Property[] p = { new Property("color", "black") };
 			properties = p;
+		} else {
+			properties = new Property[0];
 		}
 	}
 

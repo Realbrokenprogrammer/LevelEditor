@@ -1,7 +1,5 @@
 package editor.controller;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -114,15 +112,11 @@ public class MainWindowController implements LevelEditorController {
 
 	public void setNewLevel(LevelSettings levelSettings) {
 		Stage stage = (Stage) this.root.getScene().getWindow();
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		double width = screenSize.getWidth() * 0.7;
-		double height = screenSize.getHeight() * 0.7;
-		stage.setWidth(width);
-		stage.setHeight(height);
+		stage.setMaximized(true);
 		resetLevelPane();
 		this.levelPane.setMapSize(levelSettings.width * TILE_SIZE, levelSettings.height * TILE_SIZE);
-		this.objectPanel.setMinHeight(height);
-		this.propertyPanel.setMinHeight(height);
+		this.objectPanel.setMinHeight(stage.getHeight());
+		this.propertyPanel.setMinHeight(stage.getHeight());
 
 		layerCheckBox.setOnAction(e -> {
 			levelPane.setShowOnlyCurrentLayer(layerCheckBox.isSelected());
@@ -173,27 +167,23 @@ public class MainWindowController implements LevelEditorController {
 	}
 
 	private void initAllObjects() {
-		GameObject grass = new GameObject();
-		grass.type = ObjectType.TILE;
-		grass.setObjectName("grass");
-		grass.imageURL = "res/sprites/" + grass.getObjectName() + ".png";
-		grass.image = new Image("file:" + grass.imageURL);
-		grass.selectedPixels = sobel(grass.image, Color.RED);
-		grass.highlightPixels = sobel(grass.image, Color.BLUE);
-		grass.width = 32;
-		grass.height = 32;
+		File[] files = new File("./res/sprites").listFiles();
+		GameObject[] temp = new GameObject[files.length];
 		
-		GameObject suit = new GameObject();
-		suit.type = ObjectType.ENEMY;
-		suit.setObjectName("suit");
-		suit.imageURL = "res/sprites/" + suit.getObjectName() + ".png";
-		suit.image = new Image("file:" + suit.imageURL);
-		suit.selectedPixels = sobel(suit.image, Color.RED);
-		suit.highlightPixels = sobel(suit.image, Color.BLUE);
-		suit.width = 64;
-		suit.height = 128;
+		for (int i = 0; i < files.length; i++) {
+			GameObject o = new GameObject();
+			o.type = ObjectType.TILE;
+			o.imageURL = files[i].getAbsolutePath();
+			o.setObjectName(files[i].getName());
+			Image img = new Image("file:" + o.imageURL);
+			o.image = img;
+			o.selectedPixels = sobel(o.image, Color.RED);
+			o.highlightPixels = sobel(o.image, Color.BLUE);
+			o.width = img.getWidth();
+			o.height = img.getHeight();
+			temp[i] = o;
+		}
 		
-		GameObject[] temp = { grass, suit };
 		allObjects = temp;
 	}
 
@@ -250,14 +240,14 @@ public class MainWindowController implements LevelEditorController {
 				ImageView iv = new ImageView();
 				objectPanel.setSpacing(10);
 				objectPanel.setPadding(new Insets(0, 10, 10, 10));
-				Image img = new Image("file:res/sprites/" + allObjects[i].getObjectName() + ".png", 32, 32, false, false);
+				Image img = new Image("file:" + allObjects[i].imageURL, 32, 32, false, false);
 				iv.setImage(img);
 				objectPanel.getChildren().add(iv);
 				iv.setOnMouseClicked(e -> {
 					GameObject t = new GameObject();
 					t.type = tabs.get(tabIndex);
 					t.setObjectName(allObjects[objIndex].getObjectName());
-					t.imageURL = "res/sprites/" + t.getObjectName() + ".png";
+					t.imageURL = allObjects[objIndex].imageURL;
 					t.width = allObjects[objIndex].width;
 					t.height = allObjects[objIndex].height;
 					levelPane.setCurrentObject(t);
