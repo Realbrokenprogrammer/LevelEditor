@@ -111,7 +111,9 @@ public class LevelPane extends Canvas {
 		for (int i = 0; i < grid.size(); i++) {
 			double x = grid.get(i).x + viewportX;
 			double y = grid.get(i).y + viewportY;
-			g.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+			if (isInView(x, y)) {
+				g.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+			}
 		}
 		g.setFill(Color.BLACK);
 
@@ -124,8 +126,12 @@ public class LevelPane extends Canvas {
 				GameObject t = levelMap.get(i).get(j);
 				for (int k = 0; k < allObjects.length; k++) {
 					if (t.getObjectName() == allObjects[k].getObjectName()) {
+						double x = (t.x + viewportX) / t.scale;
+						double y = (t.y + viewportY) / t.scale;
 						g.scale(t.scale, t.scale);
-						g.drawImage(allObjects[k].image, (t.x + viewportX) / t.scale, (t.y + viewportY) / t.scale);
+						if (isInView(x, y)) {
+							g.drawImage(allObjects[k].image, x, y);
+						}
 						g.scale(1 / t.scale, 1 / t.scale);
 					}
 				}
@@ -172,6 +178,13 @@ public class LevelPane extends Canvas {
 		g.scale(1 / scale, 1 / scale);
 	}
 	
+	private boolean isInView(double x, double y) {
+		if (x > -TILE_SIZE && x < this.getWidth() / scale && y > -TILE_SIZE && y < this.getHeight() / scale) {
+			return true;
+		}
+		return false;
+	}
+	
 	private void drawHighlight(GameObject o) {
 		WritableImage img = null;
 		for (int i = 0; i < allObjects.length; i++) {
@@ -197,8 +210,12 @@ public class LevelPane extends Canvas {
 		}
 
 		double s = 10.0 * ((o.width) / (double) (img.getWidth() - 10.0));
+		double x = ((o.x - s / 2) + viewportX) / o.scale;
+		double y = ((o.y - s / 2) + viewportY) / o.scale;
 		g.scale(o.scale, o.scale);
-		g.drawImage(img, ((o.x - s / 2) + viewportX) / o.scale, ((o.y - s / 2) + viewportY) / o.scale);
+		if (isInView(x, y)) {
+			g.drawImage(img, x, y);
+		}
 		g.scale(1 / o.scale, 1 / o.scale);
 	}
 

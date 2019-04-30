@@ -6,7 +6,6 @@ import java.net.URI;
 import java.util.ArrayList;
 
 import editor.entities.GameObject;
-import editor.entities.ObjectType;
 import editor.entities.Pixel;
 import editor.ui.LevelPane;
 import javafx.collections.ObservableList;
