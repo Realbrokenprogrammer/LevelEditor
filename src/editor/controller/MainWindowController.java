@@ -243,13 +243,17 @@ public class MainWindowController implements LevelEditorController {
 		for (int i = 0; i < allObjects.length; i++) {
 			if (allObjects[i].type.equals(tabs.get(tabIndex))) {
 				final int objIndex = i;
+				HBox hbox = new HBox();
+				hbox.setSpacing(10);
+				Text text = new Text(allObjects[i].getObjectName().replaceAll(".png", ""));
 				ImageView iv = new ImageView();
 				objectPanel.setSpacing(10);
 				objectPanel.setPadding(new Insets(0, 10, 10, 10));
 				Image img = new Image("file:" + allObjects[i].imageURL, 32, 32, false, false);
 				iv.setImage(img);
-				objectPanel.getChildren().add(iv);
-				iv.setOnMouseClicked(e -> {
+				hbox.getChildren().addAll(iv, text);
+				objectPanel.getChildren().add(hbox);
+				hbox.setOnMouseClicked(e -> {
 					GameObject t = new GameObject();
 					t.type = tabs.get(tabIndex);
 					t.setObjectName(allObjects[objIndex].getObjectName());

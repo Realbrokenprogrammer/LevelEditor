@@ -75,6 +75,7 @@ public class LevelPane extends Canvas {
 
 	/*
 	 * TODO:
+	 * - Find better solution for the grid
 	 * - Load all assets from file
 	 * - Export level file
 	 */
@@ -89,6 +90,15 @@ public class LevelPane extends Canvas {
 			levelMap.add(new ArrayList<GameObject>());
 		}
 		g = this.getGraphicsContext2D();
+	}
+	
+	private void setGrid(int width, int height) {
+		grid = new ArrayList<Point>();
+		for (int i = 0; i < width / TILE_SIZE; i++) {
+			for (int j = 0; j < height / TILE_SIZE; j++) {
+				grid.add(new Point((int) (i * TILE_SIZE), (int) (j * TILE_SIZE)));
+			}
+		}
 	}
 
 	/**
@@ -111,7 +121,7 @@ public class LevelPane extends Canvas {
 		for (int i = 0; i < grid.size(); i++) {
 			double x = grid.get(i).x + viewportX;
 			double y = grid.get(i).y + viewportY;
-			if (isInView(x, y)) {
+			if (isInView(x, y, TILE_SIZE, TILE_SIZE)) {
 				g.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
 			}
 		}
@@ -129,7 +139,7 @@ public class LevelPane extends Canvas {
 						double x = (t.x + viewportX) / t.scale;
 						double y = (t.y + viewportY) / t.scale;
 						g.scale(t.scale, t.scale);
-						if (isInView(x, y)) {
+						if (isInView(x, y, allObjects[k].image.getWidth(), allObjects[k].image.getHeight())) {
 							g.drawImage(allObjects[k].image, x, y);
 						}
 						g.scale(1 / t.scale, 1 / t.scale);
@@ -178,8 +188,8 @@ public class LevelPane extends Canvas {
 		g.scale(1 / scale, 1 / scale);
 	}
 	
-	private boolean isInView(double x, double y) {
-		if (x > -TILE_SIZE && x < this.getWidth() / scale && y > -TILE_SIZE && y < this.getHeight() / scale) {
+	private boolean isInView(double x, double y, double width, double height) {
+		if (x > -width && x < this.getWidth() / scale && y > -height && y < this.getHeight() / scale) {
 			return true;
 		}
 		return false;
@@ -213,7 +223,7 @@ public class LevelPane extends Canvas {
 		double x = ((o.x - s / 2) + viewportX) / o.scale;
 		double y = ((o.y - s / 2) + viewportY) / o.scale;
 		g.scale(o.scale, o.scale);
-		if (isInView(x, y)) {
+		if (isInView(x, y, img.getWidth(), img.getHeight())) {
 			g.drawImage(img, x, y);
 		}
 		g.scale(1 / o.scale, 1 / o.scale);
@@ -651,15 +661,6 @@ public class LevelPane extends Canvas {
 		t.height = currentObject.height * objectScale;
 		t.scale = objectScale;
 		return t;
-	}
-
-	private void setGrid(int width, int height) {
-		grid = new ArrayList<Point>();
-		for (int i = 0; i < width / TILE_SIZE; i++) {
-			for (int j = 0; j < height / TILE_SIZE; j++) {
-				grid.add(new Point((int) (i * TILE_SIZE), (int) (j * TILE_SIZE)));
-			}
-		}
 	}
 
 	public void setHighlightOverlaps(boolean highlightOverlaps) {
