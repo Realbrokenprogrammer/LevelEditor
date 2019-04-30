@@ -7,7 +7,6 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="editor.controller.MainWindowController">
 	<children>
       <BorderPane>
          <top>
@@ -75,11 +74,11 @@
             </AnchorPane>
          </center>
          <bottom>
-            <HBox fx:id="layerBar" prefHeight="30.0" style="-fx-background-color: #171717;" BorderPane.alignment="CENTER">
+            <HBox fx:id="layerBar" prefHeight="35.0" spacing="5.0" style="-fx-background-color: #171717;" BorderPane.alignment="CENTER">
                <children>
                   <Pane prefHeight="30.0">
                      <children>
-                        <Text fill="WHITE" layoutX="6.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Layers:" wrappingWidth="40.0" />
+                        <Text fill="WHITE" layoutX="14.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Layers:" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="30.0">
@@ -140,12 +139,12 @@
                   </HBox>
                   <Pane prefHeight="30.0" prefWidth="56.0">
                      <children>
-                        <Text fill="WHITE" layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Object" wrappingWidth="41.0" />
+                        <Text fill="WHITE" layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Object" />
                      </children>
                   </Pane>
                   <Pane prefHeight="30.0" prefWidth="56.0">
                      <children>
-                        <Text fill="WHITE" layoutX="10.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select" wrappingWidth="41.0" />
+                        <Text fill="WHITE" layoutX="10.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select" />
                      </children>
                   </Pane>
                </children>

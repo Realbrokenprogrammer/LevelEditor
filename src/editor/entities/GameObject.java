@@ -13,7 +13,7 @@ public class GameObject {
 	public Image image = null;
 	public WritableImage selectedPixels;
 	public WritableImage highlightPixels;
-	public ObjectType type = null;
+	public String type = null;
 	private String objectName = "";
 	public Property[] properties;
 

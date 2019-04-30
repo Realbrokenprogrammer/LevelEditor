@@ -258,7 +258,7 @@ public class LevelPane extends Canvas {
 
 		Stage stage = (Stage) this.getScene().getWindow();
 		this.setWidth(stage.getWidth() - 10);
-		this.setHeight(stage.getHeight() - 91);
+		this.setHeight(stage.getHeight() - 115);
 
 		stage.widthProperty().addListener((obs, oldVal, newVal) -> {
 			this.setWidth(stage.getWidth() - 10);
@@ -266,7 +266,7 @@ public class LevelPane extends Canvas {
 		});
 
 		stage.heightProperty().addListener((obs, oldVal, newVal) -> {
-			this.setHeight(stage.getHeight() - 91);
+			this.setHeight(stage.getHeight() - 115);
 			mainController.objectPanel.setMinHeight(stage.getHeight());
 			mainController.propertyPanel.setMinHeight(stage.getHeight());
 			draw();
