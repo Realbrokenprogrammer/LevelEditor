@@ -1,5 +1,6 @@
 package editor.controller;
 
+import io.LevelSettings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
@@ -25,17 +26,5 @@ public class LevelSettingsWindowController implements LevelEditorController {
 			Stage stage = (Stage) okBtn.getScene().getWindow();
 			stage.close();
 		});
-	}
-}
-
-class LevelSettings {
-	int width;
-	int height;
-	String name;
-	
-	LevelSettings(int width, int height, String name) {
-		this.width = width;
-		this.height = height;
-		this.name = name;
 	}
 }

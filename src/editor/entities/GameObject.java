@@ -1,5 +1,7 @@
 package editor.entities;
 
+import java.io.File;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 
@@ -43,6 +45,19 @@ public class GameObject {
 
 	public void setObjectName(String objectName) {
 		this.objectName = objectName;
+		File file = new File("./res/sprites");
+		File[] types = file.listFiles();
+		outerloop:
+		for (int i = 0; i < types.length; i++) {
+			File[] names = types[i].listFiles();
+			for (int j = 0; j < names.length; j++) {
+				if (names[j].getName().replaceAll(".png", "").equals(objectName)) {
+					this.type = types[i].getName();
+					break outerloop;
+				}
+			}
+		}
+		
 		if (objectName == "grass") {
 			Property[] p = { new Property("friction", "normal"), new Property("length", "short") };
 			properties = p;

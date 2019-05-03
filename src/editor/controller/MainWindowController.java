@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import editor.entities.GameObject;
 import editor.entities.Pixel;
 import editor.ui.LevelPane;
+import io.Level;
+import io.LevelFileManager;
+import io.LevelSettings;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -40,6 +43,10 @@ public class MainWindowController implements LevelEditorController {
 	@FXML
 	public MenuItem menuFileNew;
 	@FXML
+	public MenuItem menuFileOpen;
+	@FXML
+	public MenuItem munuFileSave;
+	@FXML
 	public AnchorPane anchorPane;
 	@FXML
 	public HBox layerBar;
@@ -65,11 +72,13 @@ public class MainWindowController implements LevelEditorController {
 	private int currentLayer = 4;
 	private int currentObjectType = 0;
 	private GameObject[] allObjects;
+	private LevelFileManager levelFileManager;
 
 	private final int TILE_SIZE = 32;
 
 	@FXML
 	public void initialize() {
+		levelFileManager = new LevelFileManager();
 		AnchorPane.setTopAnchor(stackPane, 0.0);
 		AnchorPane.setBottomAnchor(stackPane, 0.0);
 		AnchorPane.setLeftAnchor(stackPane, 0.0);
@@ -77,6 +86,12 @@ public class MainWindowController implements LevelEditorController {
 
 		initAllObjects();
 		initObjectPanel();
+		
+		menuFileOpen.setOnAction(e -> {
+			Level level = levelFileManager.loadFile(new File("./test.lvl"));
+			setNewLevel(level.levelSettings);
+			levelPane.levelMap = level.levelMap;
+		});
 
 		menuFileNew.setOnAction(e -> {
 			Parent root;
@@ -113,7 +128,7 @@ public class MainWindowController implements LevelEditorController {
 		Stage stage = (Stage) this.root.getScene().getWindow();
 		stage.setMaximized(true);
 		resetLevelPane();
-		this.levelPane.setMapSize(levelSettings.width * TILE_SIZE, levelSettings.height * TILE_SIZE);
+		this.levelPane.setMapSize(levelSettings, levelSettings.width * TILE_SIZE, levelSettings.height * TILE_SIZE);
 		this.objectPanel.setMinHeight(stage.getHeight());
 		this.propertyPanel.setMinHeight(stage.getHeight());
 
@@ -175,7 +190,7 @@ public class MainWindowController implements LevelEditorController {
 				GameObject o = new GameObject();
 				o.type = types[i].getName();
 				o.imageURL = files[j].getAbsolutePath();
-				o.setObjectName(files[j].getName());
+				o.setObjectName(files[j].getName().replaceAll(".png", ""));
 				Image img = new Image("file:" + o.imageURL);
 				o.image = img;
 				o.selectedPixels = sobel(o.image, Color.RED);
@@ -245,7 +260,7 @@ public class MainWindowController implements LevelEditorController {
 				final int objIndex = i;
 				HBox hbox = new HBox();
 				hbox.setSpacing(10);
-				Text text = new Text(allObjects[i].getObjectName().replaceAll(".png", ""));
+				Text text = new Text(allObjects[i].getObjectName());
 				ImageView iv = new ImageView();
 				objectPanel.setSpacing(10);
 				objectPanel.setPadding(new Insets(0, 10, 10, 10));

@@ -8,6 +8,9 @@ import editor.entities.GameObject;
 import editor.entities.Pair;
 import editor.entities.Property;
 import editor.event.EditorEventHandler;
+import io.Level;
+import io.LevelFileManager;
+import io.LevelSettings;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -37,10 +40,12 @@ public class LevelPane extends Canvas {
 
 	private MainWindowController mainController;
 	private EditorEventHandler eventHandler;
+	private LevelFileManager levelFileManager;
+	private LevelSettings levelSettings;
 
 	private GraphicsContext g;
 	private ArrayList<Point> grid;
-	private ArrayList<ArrayList<GameObject>> levelMap;
+	public ArrayList<ArrayList<GameObject>> levelMap;
 	private ArrayList<GameObject> selectedObjects;
 	private ArrayList<Pair<GameObject, Point>> movingObjects;
 	private ArrayList<GameObject> clipboard;
@@ -82,6 +87,7 @@ public class LevelPane extends Canvas {
 
 	public LevelPane(MainWindowController mainController) {
 		this.mainController = mainController;
+		levelFileManager = new LevelFileManager();
 		clipboard = new ArrayList<GameObject>();
 		selectedObjects = new ArrayList<GameObject>();
 		levelMap = new ArrayList<ArrayList<GameObject>>();
@@ -135,7 +141,7 @@ public class LevelPane extends Canvas {
 			for (int j = 0; j < levelMap.get(i).size(); j++) {
 				GameObject t = levelMap.get(i).get(j);
 				for (int k = 0; k < allObjects.length; k++) {
-					if (t.getObjectName() == allObjects[k].getObjectName()) {
+					if (t.getObjectName().equals(allObjects[k].getObjectName())) {
 						double x = (t.x + viewportX) / t.scale;
 						double y = (t.y + viewportY) / t.scale;
 						g.scale(t.scale, t.scale);
@@ -198,7 +204,7 @@ public class LevelPane extends Canvas {
 	private void drawHighlight(GameObject o) {
 		WritableImage img = null;
 		for (int i = 0; i < allObjects.length; i++) {
-			if (o.getObjectName() == allObjects[i].getObjectName()) {
+			if (o.getObjectName().equals(allObjects[i].getObjectName())) {
 				img = allObjects[i].highlightPixels;
 				break;
 			}
@@ -213,7 +219,7 @@ public class LevelPane extends Canvas {
 	private void drawSelected(GameObject o) {
 		WritableImage img = null;
 		for (int i = 0; i < allObjects.length; i++) {
-			if (o.getObjectName() == allObjects[i].getObjectName()) {
+			if (o.getObjectName().equals(allObjects[i].getObjectName())) {
 				img = allObjects[i].selectedPixels;
 				break;
 			}
@@ -270,6 +276,11 @@ public class LevelPane extends Canvas {
 		}
 		return result;
 	}
+	
+	public void save() {
+		Level level = new Level(levelSettings, levelMap);
+		levelFileManager.writeFile(level);
+	}
 
 	/**
 	 * Initializes a level. Sets the size for the map pane and calculates all
@@ -278,10 +289,11 @@ public class LevelPane extends Canvas {
 	 * @param width
 	 * @param height
 	 */
-	public void setMapSize(int width, int height) {
+	public void setMapSize(LevelSettings levelSettings, int width, int height) {
 		this.width = width;
 		this.height = height;
 		setGrid(width, height);
+		this.levelSettings = levelSettings;
 
 		Stage stage = (Stage) this.getScene().getWindow();
 		this.setWidth(stage.getWidth() - 10);
@@ -347,10 +359,14 @@ public class LevelPane extends Canvas {
 			}
 			if (e.getCode() == KeyCode.S && !isSDown) {
 				isSDown = true;
-				if (!snapToGrid) {
-					snapToGrid = true;
+				if (isCtrlDown) {
+					save();
 				} else {
-					snapToGrid = false;
+					if (!snapToGrid) {
+						snapToGrid = true;
+					} else {
+						snapToGrid = false;
+					}
 				}
 			}
 			if (e.getCode() == KeyCode.C && isCtrlDown) {
