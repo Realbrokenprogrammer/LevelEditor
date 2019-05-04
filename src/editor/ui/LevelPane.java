@@ -78,7 +78,6 @@ public class LevelPane extends Canvas {
 	/*
 	 * TODO: 
 	 * - Header for level file 
-	 * - Better way to configure object types 
 	 * - The sobel operation is very slow for bigger objects
 	 */
 

@@ -9,22 +9,25 @@ import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 import editor.entities.GameObject;
 
 public class LevelFileManager {
 	
-	private ArrayList<String> types;
+	private Map<Integer, String> types;
 	
 	public LevelFileManager() {
-		types = new ArrayList<String>();
+		types = new HashMap<Integer, String>();
 		File file = new File("types.cfg");
 		try {
 			Scanner scan = new Scanner(file);
 			while (scan.hasNext()) {
 				String str = scan.nextLine();
-				types.add(str.split(" ")[1]);
+				types.put(Integer.parseInt(str.split(" ")[0]), str.split(" ")[1]);
 			}
 			scan.close();
 		} catch (FileNotFoundException e) {
@@ -57,7 +60,7 @@ public class LevelFileManager {
 				o.width = bytesToFloat(new byte[] {bytes[i + 9], bytes[i + 10], bytes[i + 11], bytes[i + 12]});
 				o.height = bytesToFloat(new byte[] {bytes[i + 13], bytes[i + 14], bytes[i + 15], bytes[i + 16]});
 				o.scale = bytesToFloat(new byte[] {bytes[i + 17], bytes[i + 18], bytes[i + 19], bytes[i + 20]});
-				o.setObjectName(types.get(bytes[i + 21]));
+				o.setObjectName(types.get((int) bytes[i + 21]));
 				o.imageURL = "res/sprites/" + o.getObjectName() + ".png";
 				levelMap.get(layer).add(o);
 			}
@@ -91,7 +94,7 @@ public class LevelFileManager {
 					out.write(floatToBytes((float) o.width));
 					out.write(floatToBytes((float) o.height));
 					out.write(floatToBytes((float) o.scale));
-					out.write(types.indexOf(o.getObjectName())); // Type
+					out.write(getKey(o.getObjectName())); // Type
 				}
 			}
 			
@@ -102,6 +105,16 @@ public class LevelFileManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private int getKey(String value) {
+		for (Entry<Integer, String> entry : types.entrySet()) {
+	        if (entry.getValue().equals(value)) {
+	        	System.out.println(entry.getKey());
+	            return entry.getKey();
+	        }
+	    }
+	    return -1;
 	}
 	
 	private byte[] intToBytes(int value) {
