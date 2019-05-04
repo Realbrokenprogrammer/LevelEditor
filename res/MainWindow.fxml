@@ -22,7 +22,11 @@
       				</Menu>
       				<Menu mnemonicParsing="false" text="Edit">
       					<items>
-      						<MenuItem mnemonicParsing="false" text="Delete" />
+      						<MenuItem fx:id="menuEditDelete" mnemonicParsing="false" text="Delete" />
+                        <MenuItem fx:id="menuEditCopy" mnemonicParsing="false" text="Copy" />
+                        <MenuItem fx:id="menuEditPaste" mnemonicParsing="false" text="Paste" />
+                        <MenuItem fx:id="menuEditUndo" mnemonicParsing="false" text="Undo" />
+                        <MenuItem fx:id="menuEditRedo" mnemonicParsing="false" text="Redo" />
       					</items>
       				</Menu>
       				<Menu mnemonicParsing="false" text="Help">

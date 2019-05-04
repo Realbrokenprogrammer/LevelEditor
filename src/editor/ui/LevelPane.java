@@ -6,24 +6,19 @@ import java.util.ArrayList;
 import editor.controller.MainWindowController;
 import editor.entities.GameObject;
 import editor.entities.Pair;
-import editor.entities.Property;
 import editor.event.EditorEventHandler;
 import io.Level;
 import io.LevelFileManager;
 import io.LevelSettings;
-import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 /**
@@ -39,7 +34,7 @@ import javafx.stage.Stage;
 public class LevelPane extends Canvas {
 
 	private MainWindowController mainController;
-	private EditorEventHandler eventHandler;
+	public EditorEventHandler eventHandler;
 	private LevelFileManager levelFileManager;
 	private LevelSettings levelSettings;
 
@@ -80,9 +75,11 @@ public class LevelPane extends Canvas {
 
 	/*
 	 * TODO:
-	 * - Find better solution for the grid
-	 * - Load all assets from file
-	 * - Export level file
+	 * - Implement all buttons in menu bar
+	 * - Header for level file
+	 * - Better way to configure object types
+	 * - Choose path for saving and opening files
+	 * - The sobel operation is very slow for bigger objects
 	 */
 
 	public LevelPane(MainWindowController mainController) {
@@ -483,7 +480,7 @@ public class LevelPane extends Canvas {
 		eventHandler.addMoveEvent(moving);
 	}
 
-	private void copyToClipboard() {
+	public void copyToClipboard() {
 		if (!selectedObjects.isEmpty()) {
 			clipboard.clear();
 			for (int i = 0; i < selectedObjects.size(); i++) {
@@ -492,7 +489,7 @@ public class LevelPane extends Canvas {
 		}
 	}
 
-	private void pasteClipboard() {
+	public void pasteClipboard() {
 		double deltaX = clipboard.get(0).x - (mouseX / scale - viewportX);
 		double deltaY = clipboard.get(0).y - (mouseY / scale - viewportY);
 		selectedObjects.clear();
@@ -515,7 +512,7 @@ public class LevelPane extends Canvas {
 		eventHandler.addPlaceEvent(placed);
 	}
 
-	private void deleteSelected() {
+	public void deleteSelected() {
 		ArrayList<Pair<GameObject, Integer>> deleted = new ArrayList<Pair<GameObject, Integer>>();
 		for (int i = 0; i < selectedObjects.size(); i++) {
 			for (int j = 0; j < levelMap.size(); j++) {
@@ -602,7 +599,7 @@ public class LevelPane extends Canvas {
 	}
 
 	private void showProperties() {
-		mainController.propertyScroll.setVisible(true);
+		/* mainController.propertyScroll.setVisible(true);
 		while (mainController.propertyPanel.getChildren().size() > 1) {
 			mainController.propertyPanel.getChildren().remove(1);
 		}
@@ -617,11 +614,11 @@ public class LevelPane extends Canvas {
 			hbox.getChildren().add(t);
 			hbox.getChildren().add(tf);
 			mainController.propertyPanel.getChildren().add(hbox);
-		}
+		} */
 	}
 
 	private void hideProperties() {
-		mainController.propertyScroll.setVisible(false);
+		/* mainController.propertyScroll.setVisible(false);
 		if (selectedObjects.size() > 0) {
 			for (int i = 1; i < mainController.propertyPanel.getChildren().size(); i++) {
 				HBox hbox = (HBox) mainController.propertyPanel.getChildren().get(i);
@@ -631,7 +628,7 @@ public class LevelPane extends Canvas {
 		}
 		while (mainController.propertyPanel.getChildren().size() > 1) {
 			mainController.propertyPanel.getChildren().remove(1);
-		}
+		} */
 	}
 	
 	private boolean isMouseOutsideGrid() {

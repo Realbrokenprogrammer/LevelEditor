@@ -2,7 +2,6 @@ package io;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,8 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 import editor.entities.GameObject;
@@ -108,11 +105,11 @@ public class LevelFileManager {
 		}
 	}
 	
-	byte[] intToBytes(int value) {
+	private byte[] intToBytes(int value) {
 	     return ByteBuffer.allocate(4).putInt(value).array();
 	}
 
-	int bytesToInt(byte[] bytes) {
+	private int bytesToInt(byte[] bytes) {
 	     return ByteBuffer.wrap(bytes).getInt();
 	}
 	

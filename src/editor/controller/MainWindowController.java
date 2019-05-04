@@ -45,7 +45,17 @@ public class MainWindowController implements LevelEditorController {
 	@FXML
 	public MenuItem menuFileOpen;
 	@FXML
-	public MenuItem munuFileSave;
+	public MenuItem menuFileSave;
+	@FXML
+	public MenuItem menuEditDelete;
+	@FXML
+	public MenuItem menuEditCopy;
+	@FXML
+	public MenuItem menuEditPaste;
+	@FXML
+	public MenuItem menuEditUndo;
+	@FXML
+	public MenuItem menuEditRedo;
 	@FXML
 	public AnchorPane anchorPane;
 	@FXML
@@ -86,6 +96,26 @@ public class MainWindowController implements LevelEditorController {
 
 		initAllObjects();
 		initObjectPanel();
+		
+		menuEditDelete.setOnAction(e -> {
+			levelPane.deleteSelected();
+		});
+		
+		menuEditCopy.setOnAction(e -> {
+			levelPane.copyToClipboard();
+		});
+		
+		menuEditPaste.setOnAction(e -> {
+			levelPane.pasteClipboard();
+		});
+		
+		menuEditUndo.setOnAction(e -> {
+			levelPane.eventHandler.undo(levelPane.levelMap);
+		});
+		
+		menuEditRedo.setOnAction(e -> {
+			levelPane.eventHandler.redo(levelPane.levelMap);
+		});
 		
 		menuFileOpen.setOnAction(e -> {
 			Level level = levelFileManager.loadFile(new File("./test.lvl"));
