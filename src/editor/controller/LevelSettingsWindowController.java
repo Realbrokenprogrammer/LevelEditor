@@ -8,7 +8,6 @@ import javafx.stage.Stage;
 
 public class LevelSettingsWindowController implements LevelEditorController {
 	
-	@FXML public TextField tileMapName;
 	@FXML public TextField tileMapHeight;
 	@FXML public TextField tileMapWidth;
 	@FXML public Button okBtn;
@@ -20,8 +19,8 @@ public class LevelSettingsWindowController implements LevelEditorController {
 		okBtn.setOnAction(e -> {
 			int width = Integer.parseInt(tileMapWidth.getText());
 			int height = Integer.parseInt(tileMapHeight.getText());
-			String name = tileMapName.getText();
-			LevelSettings levelSettings = new LevelSettings(width, height, name);
+			LevelSettings levelSettings = new LevelSettings(width, height);
+			controller.openedFile = null;
 			controller.setNewLevel(levelSettings);
 			Stage stage = (Stage) okBtn.getScene().getWindow();
 			stage.close();

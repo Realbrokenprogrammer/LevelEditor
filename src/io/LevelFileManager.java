@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -35,13 +34,13 @@ public class LevelFileManager {
 	
 	public Level loadFile(File file) {
 		try {
-			Path path = Paths.get("test.lvl");
+			Path path = file.toPath();
 			byte[] bytes =  Files.readAllBytes(path);
 			
 			// Read width and hight of the level in tiles
 			int width = bytesToInt(new byte[] {bytes[0], bytes[1], bytes[2], bytes[3]});
 			int height = bytesToInt(new byte[] {bytes[4], bytes[5], bytes[6], bytes[7]});
-			LevelSettings ls = new LevelSettings(width, height, "test");
+			LevelSettings ls = new LevelSettings(width, height);
 			
 			// Init level map
 			ArrayList<ArrayList<GameObject>> levelMap = new ArrayList<ArrayList<GameObject>>();
@@ -71,10 +70,10 @@ public class LevelFileManager {
 		return null;
 	}
 	
-	public void writeFile(Level level) {
+	public void writeFile(Level level, String filePath) {
 		ArrayList<ArrayList<GameObject>> levelMap = level.levelMap;
 		try {
-			FileOutputStream fos = new FileOutputStream("test.lvl");
+			FileOutputStream fos = new FileOutputStream(filePath);
 			BufferedOutputStream out = new BufferedOutputStream(fos);
 			
 			byte[] width = intToBytes(level.levelSettings.width);

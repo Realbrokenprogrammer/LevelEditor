@@ -1,6 +1,7 @@
 package editor.ui;
 
 import java.awt.Point;
+import java.io.File;
 import java.util.ArrayList;
 
 import editor.controller.MainWindowController;
@@ -19,6 +20,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
@@ -74,11 +76,9 @@ public class LevelPane extends Canvas {
 	private boolean highlightOverlaps = false;
 
 	/*
-	 * TODO:
-	 * - Implement all buttons in menu bar
-	 * - Header for level file
-	 * - Better way to configure object types
-	 * - Choose path for saving and opening files
+	 * TODO: 
+	 * - Header for level file 
+	 * - Better way to configure object types 
 	 * - The sobel operation is very slow for bigger objects
 	 */
 
@@ -94,7 +94,7 @@ public class LevelPane extends Canvas {
 		}
 		g = this.getGraphicsContext2D();
 	}
-	
+
 	private void setGrid(int width, int height) {
 		grid = new ArrayList<Point>();
 		for (int i = 0; i < width / TILE_SIZE; i++) {
@@ -112,15 +112,8 @@ public class LevelPane extends Canvas {
 		g.fillRect(0, 0, this.getWidth(), this.getHeight());
 		g.scale(scale, scale);
 
-		g.setFill(new Color(0, 0, 1, 0.3));
-		if (selectRectangle != null) {
-			Rectangle r = getAdjustedRect();
-			getSelectedObjects(r);
-			g.fillRect(r.getX(), r.getY(), r.getWidth(), r.getHeight());
-		}
-		g.setStroke(new Color(0.5, 0.5, 0.5, 1));
-
 		// Draw grid.
+		g.setStroke(new Color(0.5, 0.5, 0.5, 1));
 		for (int i = 0; i < grid.size(); i++) {
 			double x = grid.get(i).x + viewportX;
 			double y = grid.get(i).y + viewportY;
@@ -188,16 +181,24 @@ public class LevelPane extends Canvas {
 			}
 		}
 
+		// Draw select rectangle.
+		g.setFill(new Color(0, 0, 1, 0.3));
+		if (selectRectangle != null) {
+			Rectangle r = getAdjustedRect();
+			getSelectedObjects(r);
+			g.fillRect(r.getX(), r.getY(), r.getWidth(), r.getHeight());
+		}
+
 		g.scale(1 / scale, 1 / scale);
 	}
-	
+
 	private boolean isInView(double x, double y, double width, double height) {
 		if (x > -width && x < this.getWidth() / scale && y > -height && y < this.getHeight() / scale) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	private void drawHighlight(GameObject o) {
 		WritableImage img = null;
 		for (int i = 0; i < allObjects.length; i++) {
@@ -273,10 +274,17 @@ public class LevelPane extends Canvas {
 		}
 		return result;
 	}
-	
-	public void save() {
+
+	public void save(File file) {
 		Level level = new Level(levelSettings, levelMap);
-		levelFileManager.writeFile(level);
+		FileChooser fc = new FileChooser();
+		if (file == null) {
+			String filePath = fc.showSaveDialog(this.getScene().getWindow()).getAbsolutePath();
+			levelFileManager.writeFile(level, filePath);
+		} else {
+			levelFileManager.writeFile(level, file.getAbsolutePath());
+		}
+		
 	}
 
 	/**
@@ -357,7 +365,7 @@ public class LevelPane extends Canvas {
 			if (e.getCode() == KeyCode.S && !isSDown) {
 				isSDown = true;
 				if (isCtrlDown) {
-					save();
+					save(mainController.openedFile);
 				} else {
 					if (!snapToGrid) {
 						snapToGrid = true;
@@ -599,38 +607,33 @@ public class LevelPane extends Canvas {
 	}
 
 	private void showProperties() {
-		/* mainController.propertyScroll.setVisible(true);
-		while (mainController.propertyPanel.getChildren().size() > 1) {
-			mainController.propertyPanel.getChildren().remove(1);
-		}
-		for (int i = 0; i < selectedObjects.get(0).properties.length; i++) {
-			Property p = selectedObjects.get(0).properties[i];
-			HBox hbox = new HBox();
-			hbox.setSpacing(5);
-			hbox.setPadding(new Insets(0, 0, 0, 5));
-			Text t = new Text(p.name + ":");
-			TextField tf = new TextField();
-			tf.setText(p.value);
-			hbox.getChildren().add(t);
-			hbox.getChildren().add(tf);
-			mainController.propertyPanel.getChildren().add(hbox);
-		} */
+		/*
+		 * mainController.propertyScroll.setVisible(true); while
+		 * (mainController.propertyPanel.getChildren().size() > 1) {
+		 * mainController.propertyPanel.getChildren().remove(1); } for (int i =
+		 * 0; i < selectedObjects.get(0).properties.length; i++) { Property p =
+		 * selectedObjects.get(0).properties[i]; HBox hbox = new HBox();
+		 * hbox.setSpacing(5); hbox.setPadding(new Insets(0, 0, 0, 5)); Text t =
+		 * new Text(p.name + ":"); TextField tf = new TextField();
+		 * tf.setText(p.value); hbox.getChildren().add(t);
+		 * hbox.getChildren().add(tf);
+		 * mainController.propertyPanel.getChildren().add(hbox); }
+		 */
 	}
 
 	private void hideProperties() {
-		/* mainController.propertyScroll.setVisible(false);
-		if (selectedObjects.size() > 0) {
-			for (int i = 1; i < mainController.propertyPanel.getChildren().size(); i++) {
-				HBox hbox = (HBox) mainController.propertyPanel.getChildren().get(i);
-				TextField tf = (TextField) hbox.getChildren().get(1);
-				selectedObjects.get(0).properties[i - 1].value = tf.getText();
-			}
-		}
-		while (mainController.propertyPanel.getChildren().size() > 1) {
-			mainController.propertyPanel.getChildren().remove(1);
-		} */
+		/*
+		 * mainController.propertyScroll.setVisible(false); if
+		 * (selectedObjects.size() > 0) { for (int i = 1; i <
+		 * mainController.propertyPanel.getChildren().size(); i++) { HBox hbox =
+		 * (HBox) mainController.propertyPanel.getChildren().get(i); TextField
+		 * tf = (TextField) hbox.getChildren().get(1);
+		 * selectedObjects.get(0).properties[i - 1].value = tf.getText(); } }
+		 * while (mainController.propertyPanel.getChildren().size() > 1) {
+		 * mainController.propertyPanel.getChildren().remove(1); }
+		 */
 	}
-	
+
 	private boolean isMouseOutsideGrid() {
 		double x = mouseX / scale - viewportX;
 		double y = mouseY / scale - viewportY;

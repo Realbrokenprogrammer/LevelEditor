@@ -33,6 +33,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -83,6 +84,7 @@ public class MainWindowController implements LevelEditorController {
 	private int currentObjectType = 0;
 	private GameObject[] allObjects;
 	private LevelFileManager levelFileManager;
+	public File openedFile;
 
 	private final int TILE_SIZE = 32;
 
@@ -96,6 +98,10 @@ public class MainWindowController implements LevelEditorController {
 
 		initAllObjects();
 		initObjectPanel();
+		
+		menuFileSave.setOnAction(e -> {
+			levelPane.save(openedFile);
+		});
 		
 		menuEditDelete.setOnAction(e -> {
 			levelPane.deleteSelected();
@@ -118,9 +124,12 @@ public class MainWindowController implements LevelEditorController {
 		});
 		
 		menuFileOpen.setOnAction(e -> {
-			Level level = levelFileManager.loadFile(new File("./test.lvl"));
+			FileChooser fc = new FileChooser();
+			openedFile = fc.showOpenDialog(root.getScene().getWindow());
+			Level level = levelFileManager.loadFile(openedFile);
 			setNewLevel(level.levelSettings);
 			levelPane.levelMap = level.levelMap;
+			levelPane.draw();
 		});
 
 		menuFileNew.setOnAction(e -> {
@@ -336,28 +345,19 @@ public class MainWindowController implements LevelEditorController {
 
 		for (int x = 1; x < grayscale.length - 1; x++) {
 			for (int y = 1; y < grayscale[0].length - 1; y++) {
-				Color topRight = grayscale[x + 1][y - 1].color;
-				Color middleRight = grayscale[x + 1][y].color;
-				Color bottomRight = grayscale[x + 1][y + 1].color;
-				Color topLeft = grayscale[x - 1][y - 1].color;
-				Color middleLeft = grayscale[x - 1][y].color;
-				Color bottomLeft = grayscale[x - 1][y + 1].color;
-				Color topCenter = grayscale[x][y - 1].color;
-				Color bottomCenter = grayscale[x][y + 1].color;
+				double val1 = grayscale[x - 1][y - 1].color.getRed() * -1;
+				val1 += grayscale[x - 1][y].color.getRed() * -2;
+				val1 += grayscale[x - 1][y + 1].color.getRed() * -1;
+				val1 += grayscale[x + 1][y - 1].color.getRed();
+				val1 += grayscale[x + 1][y].color.getRed() * 2;
+				val1 += grayscale[x + 1][y + 1].color.getRed();
 
-				double val1 = topLeft.getRed() * -1;
-				val1 += middleLeft.getRed() * -2;
-				val1 += bottomLeft.getRed() * -1;
-				val1 += topRight.getRed();
-				val1 += middleRight.getRed() * 2;
-				val1 += bottomRight.getRed();
-
-				double val2 = topLeft.getRed() * -1;
-				val2 += topCenter.getRed() * -2;
-				val2 += topRight.getRed() * -1;
-				val2 += bottomLeft.getRed() * 1;
-				val2 += bottomCenter.getRed() * 2;
-				val2 += bottomRight.getRed() * 1;
+				double val2 = grayscale[x - 1][y - 1].color.getRed() * -1;
+				val2 += grayscale[x][y - 1].color.getRed() * -2;
+				val2 += grayscale[x + 1][y - 1].color.getRed() * -1;
+				val2 += grayscale[x - 1][y + 1].color.getRed() * 1;
+				val2 += grayscale[x][y + 1].color.getRed() * 2;
+				val2 += grayscale[x + 1][y + 1].color.getRed() * 1;
 
 				double val = Math.sqrt(val1 * val1 + val2 * val2);
 				if (val > 1) {
