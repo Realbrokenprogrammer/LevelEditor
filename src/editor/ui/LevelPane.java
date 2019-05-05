@@ -54,7 +54,6 @@ public class LevelPane extends Canvas {
 	private double width = 0;
 	private double height = 0;
 	private double objectScale = 1.0;
-	private final int TILE_SIZE = 32;
 
 	private double mouseX = 0;
 	private double mouseY = 0;
@@ -96,9 +95,9 @@ public class LevelPane extends Canvas {
 
 	private void setGrid(int width, int height) {
 		grid = new ArrayList<Point>();
-		for (int i = 0; i < width / TILE_SIZE; i++) {
-			for (int j = 0; j < height / TILE_SIZE; j++) {
-				grid.add(new Point((int) (i * TILE_SIZE), (int) (j * TILE_SIZE)));
+		for (int i = 0; i < width / levelSettings.tileSize; i++) {
+			for (int j = 0; j < height / levelSettings.tileSize; j++) {
+				grid.add(new Point((int) (i * levelSettings.tileSize), (int) (j * levelSettings.tileSize)));
 			}
 		}
 	}
@@ -116,8 +115,8 @@ public class LevelPane extends Canvas {
 		for (int i = 0; i < grid.size(); i++) {
 			double x = grid.get(i).x + viewportX;
 			double y = grid.get(i).y + viewportY;
-			if (isInView(x, y, TILE_SIZE, TILE_SIZE)) {
-				g.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+			if (isInView(x, y, levelSettings.tileSize, levelSettings.tileSize)) {
+				g.strokeRect(x, y, levelSettings.tileSize, levelSettings.tileSize);
 			}
 		}
 		g.setFill(Color.BLACK);
@@ -265,8 +264,8 @@ public class LevelPane extends Canvas {
 	private Point findClosestGridPoint(double x, double y) {
 		Point result = grid.get(0);
 		for (int i = 0; i < grid.size(); i++) {
-			double adjustedX = x - TILE_SIZE / 2 - viewportX;
-			double adjustedY = y - TILE_SIZE / 2 - viewportY;
+			double adjustedX = x - levelSettings.tileSize / 2 - viewportX;
+			double adjustedY = y - levelSettings.tileSize / 2 - viewportY;
 			if (grid.get(i).distance(adjustedX, adjustedY) < result.distance(adjustedX, adjustedY)) {
 				result = grid.get(i);
 			}
@@ -296,8 +295,8 @@ public class LevelPane extends Canvas {
 	public void setMapSize(LevelSettings levelSettings, int width, int height) {
 		this.width = width;
 		this.height = height;
-		setGrid(width, height);
 		this.levelSettings = levelSettings;
+		setGrid(width, height);
 
 		Stage stage = (Stage) this.getScene().getWindow();
 		this.setWidth(stage.getWidth() - 10);

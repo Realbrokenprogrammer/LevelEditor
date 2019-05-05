@@ -86,7 +86,7 @@ public class MainWindowController implements LevelEditorController {
 	private LevelFileManager levelFileManager;
 	public File openedFile;
 
-	private final int TILE_SIZE = 32;
+	private int tileSize = 32;
 
 	@FXML
 	public void initialize() {
@@ -167,7 +167,7 @@ public class MainWindowController implements LevelEditorController {
 		Stage stage = (Stage) this.root.getScene().getWindow();
 		stage.setMaximized(true);
 		resetLevelPane();
-		this.levelPane.setMapSize(levelSettings, levelSettings.width * TILE_SIZE, levelSettings.height * TILE_SIZE);
+		this.levelPane.setMapSize(levelSettings, levelSettings.width * levelSettings.tileSize, levelSettings.height * levelSettings.tileSize);
 		this.objectPanel.setMinHeight(stage.getHeight());
 		this.propertyPanel.setMinHeight(stage.getHeight());
 

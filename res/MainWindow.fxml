@@ -1,162 +1,170 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.canvas.*?>
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
 
-<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="editor.controller.MainWindowController">
+<VBox fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="editor.controller.MainWindowController">
 	<children>
-      <BorderPane>
-         <top>
-      		<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
-      			<menus>
-      				<Menu fx:id="menuFile" mnemonicParsing="false" text="File">
-      					<items>
-      						<MenuItem fx:id="menuFileNew" mnemonicParsing="false" text="New File" />
-                        <MenuItem fx:id="menuFileOpen" mnemonicParsing="false" text="Open File" />
-                        <MenuItem fx:id="menuFileSave" mnemonicParsing="false" text="Save File" />
-      					</items>
-      				</Menu>
-      				<Menu mnemonicParsing="false" text="Edit">
-      					<items>
-      						<MenuItem fx:id="menuEditDelete" mnemonicParsing="false" text="Delete" />
-                        <MenuItem fx:id="menuEditCopy" mnemonicParsing="false" text="Copy" />
-                        <MenuItem fx:id="menuEditPaste" mnemonicParsing="false" text="Paste" />
-                        <MenuItem fx:id="menuEditUndo" mnemonicParsing="false" text="Undo" />
-                        <MenuItem fx:id="menuEditRedo" mnemonicParsing="false" text="Redo" />
-      					</items>
-      				</Menu>
-      				<Menu mnemonicParsing="false" text="Help">
-      					<items>
-      						<MenuItem mnemonicParsing="false" text="About" />
-      					</items>
-      				</Menu>
-      			</menus>
-      		</MenuBar>
-         </top>
-         <center>
-          <AnchorPane fx:id="anchorPane" minHeight="0.0" minWidth="0.0" BorderPane.alignment="CENTER">
-               <children>
-                  <StackPane fx:id="stackPane">
-                     <children>
-                        <ScrollPane fx:id="objectScroll" hbarPolicy="NEVER" maxWidth="300.0" minWidth="300.0" opacity="0.8" prefWidth="300.0" visible="false" StackPane.alignment="CENTER_RIGHT">
-                          <content>
-                            <AnchorPane maxWidth="300.0" minWidth="300.0" prefWidth="300.0">
-                                 <children>
-                                    <VBox fx:id="objectPanel" fillWidth="false" maxHeight="500.0" maxWidth="300.0" minHeight="500.0" minWidth="300.0" prefHeight="500.0" prefWidth="300.0">
-                                       <children>
-                                          <HBox fx:id="objectBar" fillHeight="false" maxWidth="300.0" minWidth="300.0" prefHeight="30.0" prefWidth="300.0" />
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </AnchorPane>
-                          </content>
-                        </ScrollPane>
-                        <ScrollPane fx:id="propertyScroll" hbarPolicy="NEVER" maxWidth="300.0" minWidth="300.0" opacity="0.8" prefWidth="300.0" visible="false" StackPane.alignment="CENTER_LEFT">
-                           <content>
-                              <AnchorPane maxWidth="300.0" minWidth="300.0" prefWidth="300.0" style="-fx-background-color: #CCCCCC;">
-                                 <children>
-                                    <VBox fx:id="propertyPanel" fillWidth="false" maxHeight="500.0" maxWidth="300.0" minHeight="500.0" minWidth="300.0" prefHeight="500.0" prefWidth="300.0" spacing="10.0">
-                                       <children>
-                                          <HBox prefHeight="30.0" prefWidth="300.0" style="-fx-background-color: #FFFFFF;">
-                                             <padding>
-                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                             </padding>
-                                             <children>
-                                                <Label text="Properties" />
-                                             </children>
-                                          </HBox>
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </AnchorPane>
-                           </content>
-                        </ScrollPane>
-                     </children>
-                  </StackPane>
-               </children>
-            </AnchorPane>
-         </center>
-         <bottom>
-            <HBox fx:id="layerBar" prefHeight="35.0" spacing="5.0" style="-fx-background-color: #171717;" BorderPane.alignment="CENTER">
-               <children>
-                  <Pane prefHeight="30.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="14.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Layers:" />
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="30.0" prefWidth="30.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="1" wrappingWidth="13.0" />
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="30.0" prefWidth="30.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="2" wrappingWidth="13.0" />
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="30.0" prefWidth="30.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="3" wrappingWidth="13.0" />
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="30.0" prefWidth="30.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="4" wrappingWidth="13.0" />
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="30.0" prefWidth="30.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="5" wrappingWidth="13.0" />
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="30.0" prefWidth="30.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="6" wrappingWidth="13.0" />
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="30.0" prefWidth="30.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="7" wrappingWidth="13.0" />
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="30.0" prefWidth="30.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="8" wrappingWidth="13.0" />
-                     </children>
-                  </Pane>
-                  <HBox alignment="CENTER">
-                     <children>
-                        <CheckBox fx:id="layerCheckBox" mnemonicParsing="false" text="View only this layer" textFill="WHITE" />
-                     </children>
-                     <padding>
-                        <Insets left="5.0" right="5.0" />
-                     </padding>
-                  </HBox>
-                  <HBox alignment="CENTER">
-                     <children>
-                        <CheckBox fx:id="overlapCheckBox" mnemonicParsing="false" text="Highlight overlaps" textFill="WHITE" />
-                     </children>
-                     <padding>
-                        <Insets left="5.0" right="5.0" />
-                     </padding>
-                  </HBox>
-                  <Pane prefHeight="30.0" prefWidth="56.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Object" />
-                     </children>
-                  </Pane>
-                  <Pane prefHeight="30.0" prefWidth="56.0">
-                     <children>
-                        <Text fill="WHITE" layoutX="10.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select" />
-                     </children>
-                  </Pane>
-               </children>
-            </HBox>
-         </bottom>
-      </BorderPane>
+		<BorderPane>
+			<top>
+				<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+					<menus>
+						<Menu fx:id="menuFile" mnemonicParsing="false" text="File">
+							<items>
+								<MenuItem fx:id="menuFileNew" mnemonicParsing="false" text="New File" />
+								<MenuItem fx:id="menuFileOpen" mnemonicParsing="false" text="Open File" />
+								<MenuItem fx:id="menuFileSave" mnemonicParsing="false" text="Save File" />
+							</items>
+						</Menu>
+						<Menu mnemonicParsing="false" text="Edit">
+							<items>
+								<MenuItem fx:id="menuEditDelete" mnemonicParsing="false" text="Delete" />
+								<MenuItem fx:id="menuEditCopy" mnemonicParsing="false" text="Copy" />
+								<MenuItem fx:id="menuEditPaste" mnemonicParsing="false" text="Paste" />
+								<MenuItem fx:id="menuEditUndo" mnemonicParsing="false" text="Undo" />
+								<MenuItem fx:id="menuEditRedo" mnemonicParsing="false" text="Redo" />
+							</items>
+						</Menu>
+						<Menu mnemonicParsing="false" text="Help">
+							<items>
+								<MenuItem mnemonicParsing="false" text="About" />
+							</items>
+						</Menu>
+					</menus>
+				</MenuBar>
+			</top>
+			<center>
+				<AnchorPane fx:id="anchorPane" minHeight="0.0" minWidth="0.0" BorderPane.alignment="CENTER">
+					<children>
+						<StackPane fx:id="stackPane">
+							<children>
+								<ScrollPane fx:id="objectScroll" hbarPolicy="NEVER" maxWidth="300.0" minWidth="300.0" opacity="0.8" prefWidth="300.0" visible="false" StackPane.alignment="CENTER_RIGHT">
+									<content>
+										<AnchorPane maxWidth="300.0" minWidth="300.0" prefWidth="300.0">
+											<children>
+												<VBox fx:id="objectPanel" fillWidth="false">
+													<children>
+														<HBox fx:id="objectBar" fillHeight="false" maxWidth="300.0" minWidth="300.0" prefHeight="30.0" prefWidth="300.0" />
+													</children>
+												</VBox>
+											</children>
+										</AnchorPane>
+									</content>
+								</ScrollPane>
+								<ScrollPane fx:id="propertyScroll" hbarPolicy="NEVER" maxWidth="300.0" minWidth="300.0" opacity="0.8" prefWidth="300.0" visible="false" StackPane.alignment="CENTER_LEFT">
+									<content>
+										<AnchorPane maxWidth="300.0" minWidth="300.0" prefWidth="300.0" style="-fx-background-color: #CCCCCC;">
+											<children>
+												<VBox fx:id="propertyPanel" fillWidth="false" maxHeight="500.0" maxWidth="300.0" minHeight="500.0" minWidth="300.0" prefHeight="500.0" prefWidth="300.0" spacing="10.0">
+													<children>
+														<HBox prefHeight="30.0" prefWidth="300.0" style="-fx-background-color: #FFFFFF;">
+															<padding>
+																<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+															</padding>
+															<children>
+																<Label text="Properties" />
+															</children>
+														</HBox>
+													</children>
+												</VBox>
+											</children>
+										</AnchorPane>
+									</content>
+								</ScrollPane>
+							</children>
+						</StackPane>
+					</children>
+				</AnchorPane>
+			</center>
+			<bottom>
+				<HBox fx:id="layerBar" prefHeight="35.0" spacing="5.0" style="-fx-background-color: #171717;" BorderPane.alignment="CENTER">
+					<children>
+						<Pane prefHeight="30.0">
+							<children>
+								<Text fill="WHITE" layoutX="14.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Layers:" />
+							</children>
+						</Pane>
+						<Pane prefHeight="30.0" prefWidth="30.0">
+							<children>
+								<Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="1" wrappingWidth="13.0" />
+							</children>
+						</Pane>
+						<Pane prefHeight="30.0" prefWidth="30.0">
+							<children>
+								<Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="2" wrappingWidth="13.0" />
+							</children>
+						</Pane>
+						<Pane prefHeight="30.0" prefWidth="30.0">
+							<children>
+								<Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="3" wrappingWidth="13.0" />
+							</children>
+						</Pane>
+						<Pane prefHeight="30.0" prefWidth="30.0">
+							<children>
+								<Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="4" wrappingWidth="13.0" />
+							</children>
+						</Pane>
+						<Pane prefHeight="30.0" prefWidth="30.0">
+							<children>
+								<Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="5" wrappingWidth="13.0" />
+							</children>
+						</Pane>
+						<Pane prefHeight="30.0" prefWidth="30.0">
+							<children>
+								<Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="6" wrappingWidth="13.0" />
+							</children>
+						</Pane>
+						<Pane prefHeight="30.0" prefWidth="30.0">
+							<children>
+								<Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="7" wrappingWidth="13.0" />
+							</children>
+						</Pane>
+						<Pane prefHeight="30.0" prefWidth="30.0">
+							<children>
+								<Text fill="WHITE" layoutX="10.0" layoutY="21.0" strokeType="OUTSIDE" strokeWidth="0.0" text="8" wrappingWidth="13.0" />
+							</children>
+						</Pane>
+						<HBox alignment="CENTER">
+							<children>
+								<CheckBox fx:id="layerCheckBox" mnemonicParsing="false" text="View only this layer" textFill="WHITE" />
+							</children>
+							<padding>
+								<Insets left="5.0" right="5.0" />
+							</padding>
+						</HBox>
+						<HBox alignment="CENTER">
+							<children>
+								<CheckBox fx:id="overlapCheckBox" mnemonicParsing="false" text="Highlight overlaps" textFill="WHITE" />
+							</children>
+							<padding>
+								<Insets left="5.0" right="5.0" />
+							</padding>
+						</HBox>
+						<Pane prefHeight="30.0" prefWidth="56.0">
+							<children>
+								<Text fill="WHITE" layoutX="8.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Object" />
+							</children>
+						</Pane>
+						<Pane prefHeight="30.0" prefWidth="56.0">
+							<children>
+								<Text fill="WHITE" layoutX="10.0" layoutY="20.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Select" />
+							</children>
+						</Pane>
+					</children>
+				</HBox>
+			</bottom>
+		</BorderPane>
 	</children>
 </VBox>

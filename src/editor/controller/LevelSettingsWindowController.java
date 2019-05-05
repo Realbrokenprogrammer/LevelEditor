@@ -10,6 +10,7 @@ public class LevelSettingsWindowController implements LevelEditorController {
 	
 	@FXML public TextField tileMapHeight;
 	@FXML public TextField tileMapWidth;
+	@FXML public TextField tileSize;
 	@FXML public Button okBtn;
 
 	@FXML public void initialize() {
@@ -19,7 +20,8 @@ public class LevelSettingsWindowController implements LevelEditorController {
 		okBtn.setOnAction(e -> {
 			int width = Integer.parseInt(tileMapWidth.getText());
 			int height = Integer.parseInt(tileMapHeight.getText());
-			LevelSettings levelSettings = new LevelSettings(width, height);
+			int tile = Integer.parseInt(tileSize.getText());
+			LevelSettings levelSettings = new LevelSettings(width, height, tile);
 			controller.openedFile = null;
 			controller.setNewLevel(levelSettings);
 			Stage stage = (Stage) okBtn.getScene().getWindow();

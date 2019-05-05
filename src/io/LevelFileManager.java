@@ -43,7 +43,7 @@ public class LevelFileManager {
 			// Read width and hight of the level in tiles
 			int width = bytesToInt(new byte[] {bytes[0], bytes[1], bytes[2], bytes[3]});
 			int height = bytesToInt(new byte[] {bytes[4], bytes[5], bytes[6], bytes[7]});
-			LevelSettings ls = new LevelSettings(width, height);
+			LevelSettings ls = new LevelSettings(width, height, 32); // Temporary, also save tile size
 			
 			// Init level map
 			ArrayList<ArrayList<GameObject>> levelMap = new ArrayList<ArrayList<GameObject>>();
