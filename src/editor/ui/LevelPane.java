@@ -76,8 +76,8 @@ public class LevelPane extends Canvas {
 
 	/*
 	 * TODO: 
-	 * - Header for level file 
-	 * - The sobel operation is very slow for bigger objects
+	 * - Ability to select from all layers
+	 * - Header for level file
 	 */
 
 	public LevelPane(MainWindowController mainController) {
@@ -100,6 +100,13 @@ public class LevelPane extends Canvas {
 				grid.add(new Point((int) (i * levelSettings.tileSize), (int) (j * levelSettings.tileSize)));
 			}
 		}
+	}
+	
+	public void updateMapSize(LevelSettings levelSettings, int width, int height) {
+		this.levelSettings = levelSettings;
+		setGrid(width, height);
+		this.width = width;
+		this.height = height;
 	}
 
 	/**

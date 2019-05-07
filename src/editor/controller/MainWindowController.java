@@ -58,6 +58,8 @@ public class MainWindowController implements LevelEditorController {
 	@FXML
 	public MenuItem menuEditRedo;
 	@FXML
+	public MenuItem menuEditChangeSize;
+	@FXML
 	public AnchorPane anchorPane;
 	@FXML
 	public HBox layerBar;
@@ -123,6 +125,29 @@ public class MainWindowController implements LevelEditorController {
 			levelPane.eventHandler.redo(levelPane.levelMap);
 		});
 		
+		menuEditChangeSize.setOnAction(e -> {
+			Parent root;
+			URI location = new File("res/" + LEVEL_SETTINGS_WINDOW).toURI();
+			LevelSettingsWindowController levelSettingsWindowController;
+
+			try {
+				FXMLLoader loader = new FXMLLoader(location.toURL());
+				root = loader.load();
+
+				Stage stage = new Stage();
+				stage.setTitle("Level Settings");
+				stage.setScene(new Scene(root));
+
+				levelSettingsWindowController = loader.<LevelSettingsWindowController>getController();
+				levelSettingsWindowController.getUpdatedSettings(levelPane);
+
+				stage.initModality(Modality.APPLICATION_MODAL);
+				stage.show();
+			} catch (IOException exception) {
+				exception.printStackTrace();
+			}
+		});
+		
 		menuFileOpen.setOnAction(e -> {
 			FileChooser fc = new FileChooser();
 			openedFile = fc.showOpenDialog(root.getScene().getWindow());
@@ -167,7 +192,9 @@ public class MainWindowController implements LevelEditorController {
 		Stage stage = (Stage) this.root.getScene().getWindow();
 		stage.setMaximized(true);
 		resetLevelPane();
-		this.levelPane.setMapSize(levelSettings, levelSettings.width * levelSettings.tileSize, levelSettings.height * levelSettings.tileSize);
+		int width = levelSettings.width * levelSettings.tileSize;
+		int height = levelSettings.height * levelSettings.tileSize;
+		this.levelPane.setMapSize(levelSettings, width, height);
 		this.objectPanel.setMinHeight(stage.getHeight());
 		this.propertyPanel.setMinHeight(stage.getHeight());
 

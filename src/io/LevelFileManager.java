@@ -110,7 +110,6 @@ public class LevelFileManager {
 	private int getKey(String value) {
 		for (Entry<Integer, String> entry : types.entrySet()) {
 	        if (entry.getValue().equals(value)) {
-	        	System.out.println(entry.getKey());
 	            return entry.getKey();
 	        }
 	    }
