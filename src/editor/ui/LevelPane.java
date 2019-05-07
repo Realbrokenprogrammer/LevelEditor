@@ -244,10 +244,19 @@ public class LevelPane extends Canvas {
 
 	private void getSelectedObjects(Rectangle r) {
 		selectedObjects.clear();
-		for (int i = 0; i < levelMap.get(currentLayer - 1).size(); i++) {
-			GameObject o = levelMap.get(currentLayer - 1).get(i);
-			if (r.intersects(o.x + viewportX, o.y + viewportY, o.width, o.height)) {
-				selectedObjects.add(o);
+		
+		for (int i = 0; i < levelMap.size(); i++) {
+			if (!isCtrlDown) {
+				i = currentLayer - 1;
+			}
+			for (int j = 0; j < levelMap.get(i).size(); j++) {
+				GameObject o = levelMap.get(i).get(j);
+				if (r.intersects(o.x + viewportX, o.y + viewportY, o.width, o.height)) {
+					selectedObjects.add(o);
+				}
+			}
+			if (!isCtrlDown) {
+				break;
 			}
 		}
 	}
