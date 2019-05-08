@@ -74,11 +74,6 @@ public class LevelPane extends Canvas {
 	private boolean showOnlyCurrentLayer = false;
 	private boolean highlightOverlaps = false;
 
-	/*
-	 * TODO:
-	 * - Header for level file
-	 */
-
 	public LevelPane(MainWindowController mainController) {
 		this.mainController = mainController;
 		levelFileManager = new LevelFileManager();

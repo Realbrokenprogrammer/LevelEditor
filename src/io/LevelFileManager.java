@@ -43,10 +43,12 @@ public class LevelFileManager {
 			// Read header
 			System.out.println((char) bytes[0] + "" + (char) bytes[1] + "" + (char) bytes[2]);
 			int offset = bytes[3];
+			int objCount = bytesToInt(new byte[] {bytes[4], bytes[5], bytes[6], bytes[7]});
+			System.out.println(objCount);
 			
 			// Read width and hight of the level in tiles
-			int width = bytesToInt(new byte[] {bytes[4], bytes[5], bytes[6], bytes[7]});
-			int height = bytesToInt(new byte[] {bytes[8], bytes[9], bytes[10], bytes[11]});
+			int width = bytesToInt(new byte[] {bytes[8], bytes[9], bytes[10], bytes[11]});
+			int height = bytesToInt(new byte[] {bytes[12], bytes[13], bytes[14], bytes[15]});
 			LevelSettings ls = new LevelSettings(width, height, 32); // Temporary, also save tile size
 			
 			// Init level map
@@ -83,11 +85,18 @@ public class LevelFileManager {
 			FileOutputStream fos = new FileOutputStream(filePath);
 			BufferedOutputStream out = new BufferedOutputStream(fos);
 			
+			// Count objects
+			int objCount = 0;
+			for (int i = 0; i < levelMap.size(); i++) {
+				objCount += levelMap.get(i).size();
+			}
+			
 			// Header
 			byte[] signature = { 0x4C, 0x56, 0x4C };
-			byte offset = 12;
+			byte offset = 16;
 			out.write(signature);
 			out.write(offset);
+			out.write(intToBytes(objCount));
 			
 			// Width and Height
 			byte[] width = intToBytes(level.levelSettings.width);
