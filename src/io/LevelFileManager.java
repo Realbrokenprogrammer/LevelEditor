@@ -40,9 +40,13 @@ public class LevelFileManager {
 			Path path = file.toPath();
 			byte[] bytes =  Files.readAllBytes(path);
 			
+			// Read header
+			System.out.println((char) bytes[0] + "" + (char) bytes[1] + "" + (char) bytes[2]);
+			int offset = bytes[3];
+			
 			// Read width and hight of the level in tiles
-			int width = bytesToInt(new byte[] {bytes[0], bytes[1], bytes[2], bytes[3]});
-			int height = bytesToInt(new byte[] {bytes[4], bytes[5], bytes[6], bytes[7]});
+			int width = bytesToInt(new byte[] {bytes[4], bytes[5], bytes[6], bytes[7]});
+			int height = bytesToInt(new byte[] {bytes[8], bytes[9], bytes[10], bytes[11]});
 			LevelSettings ls = new LevelSettings(width, height, 32); // Temporary, also save tile size
 			
 			// Init level map
@@ -52,7 +56,7 @@ public class LevelFileManager {
 			}
 			
 			// Read all objects
-			for (int i = 8; i < bytes.length; i+=22) {
+			for (int i = offset; i < bytes.length; i+=22) {
 				GameObject o = new GameObject();
 				int layer = bytes[i];
 				o.x = bytesToFloat(new byte[] {bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
@@ -79,12 +83,19 @@ public class LevelFileManager {
 			FileOutputStream fos = new FileOutputStream(filePath);
 			BufferedOutputStream out = new BufferedOutputStream(fos);
 			
+			// Header
+			byte[] signature = { 0x4C, 0x56, 0x4C };
+			byte offset = 12;
+			out.write(signature);
+			out.write(offset);
+			
+			// Width and Height
 			byte[] width = intToBytes(level.levelSettings.width);
 			byte[] height = intToBytes(level.levelSettings.height);
-			
 			out.write(width);
 			out.write(height);
 			
+			// Object array
 			for (int i = 0; i < levelMap.size(); i++) {
 				for (int j = 0; j < levelMap.get(i).size(); j++) {
 					GameObject o = levelMap.get(i).get(j);

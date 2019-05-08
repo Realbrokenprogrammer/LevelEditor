@@ -75,8 +75,7 @@ public class LevelPane extends Canvas {
 	private boolean highlightOverlaps = false;
 
 	/*
-	 * TODO: 
-	 * - Ability to select from all layers
+	 * TODO:
 	 * - Header for level file
 	 */
 
@@ -244,7 +243,6 @@ public class LevelPane extends Canvas {
 
 	private void getSelectedObjects(Rectangle r) {
 		selectedObjects.clear();
-		
 		for (int i = 0; i < levelMap.size(); i++) {
 			if (!isCtrlDown) {
 				i = currentLayer - 1;
